@@ -904,7 +904,7 @@ async function enterApp(user){
   switchView('archivio');
   render();                 // mostra subito l'interfaccia
   await Promise.all([loadDipendenti(), loadMezzi()]);   // carica dati reali dal database
-  await loadNotifiche();    // pre-carica scadenze/visite per la campanella
+  await Promise.all([loadNotifiche(), loadPresenze()]); // scadenze per la campanella + registro presenze
   render();                 // ridisegna con i dati reali (e accende il pallino)
 }
 
@@ -1123,40 +1123,35 @@ function setPresenza(id,stato){
   getDip(id).presenza=stato;
   renderPresenze();
 }
-function registraPresenze(){
+async function registraPresenze(){
   const oggi=new Date().toISOString().slice(0,10);
   if(!confirm("Registrare le presenze di oggi nello storico?")) return;
-  // rimuove eventuali registrazioni odierne già presenti (riscrittura)
-  registroPresenze=registroPresenze.filter(r=>r.data!==oggi);
-  dipendenti.forEach(d=>{
-    registroPresenze.push({data:oggi, dipId:d.id, nome:`${d.nome} ${d.cognome}`, stato:d.presenza});
-  });
+  // riscrive le presenze di oggi: cancella quelle odierne e reinserisce
+  await sb.from('presenze').delete().eq('data', oggi);
+  const rows = dipendenti.map(d=>({ dipendente_id:d.id, data:oggi, stato:d.presenza||'Presente' }));
+  if(rows.length){
+    const { error } = await sb.from('presenze').insert(rows);
+    if(error){ toast("Errore nel salvataggio"); return; }
+  }
+  await loadPresenze();
   toast("✓ Presenze di oggi registrate");
+  if(presTab==='storico') renderStoricoPresenze();
 }
 
-/* costruisce le date dei giorni lavorativi passati (esclude sab/dom) */
-function pastWeekdays(n){
-  const out=[]; const d=new Date(); d.setDate(d.getDate()-1);
-  while(out.length<n){
-    const wd=d.getDay();
-    if(wd!==0 && wd!==6) out.push(d.toISOString().slice(0,10));
-    d.setDate(d.getDate()-1);
-  }
-  return out;
-}
-/* popola lo storico con dati realistici (deterministici) */
-function seedPresenze(){
-  const giorni=pastWeekdays(10);
-  // mappa di assenze pianificate: indiceGiorno -> {dipId:stato}
-  const assenze={
-    1:{3:"Ferie"}, 2:{3:"Ferie"}, 3:{2:"Malattia"},
-    5:{1:"Permesso"}, 6:{3:"Ferie"}, 8:{2:"Ferie"}, 9:{2:"Ferie"},
-  };
-  giorni.forEach((data,gi)=>{
-    dipendenti.forEach(d=>{
-      const stato=(assenze[gi] && assenze[gi][d.id]) ? assenze[gi][d.id] : "Presente";
-      registroPresenze.push({data, dipId:d.id, nome:`${d.nome} ${d.cognome}`, stato});
-    });
+/* carica tutto il registro presenze da Supabase */
+async function loadPresenze(){
+  const { data, error } = await sb.from('presenze')
+    .select('dipendente_id,data,stato').order('data',{ascending:false});
+  if(error){ console.error(error); return; }
+  const dipById = Object.fromEntries(dipendenti.map(d=>[d.id,d]));
+  registroPresenze = (data||[]).map(r=>{
+    const d=dipById[r.dipendente_id]||{};
+    return { data:r.data, dipId:r.dipendente_id, nome:`${d.nome||''} ${d.cognome||''}`.trim(), stato:r.stato };
+  });
+  // applica lo stato di OGGI ai dipendenti (per la vista "Presenze di oggi")
+  const oggi=new Date().toISOString().slice(0,10);
+  registroPresenze.filter(r=>r.data===oggi).forEach(r=>{
+    const d=dipById[r.dipId]; if(d) d.presenza=r.stato;
   });
 }
 
@@ -1792,7 +1787,6 @@ function scadAdd(id){getMez(id).scadenze.push({tipo:"Revisione",data:new Date(Da
 function scadDel(id,i){getMez(id).scadenze.splice(i,1);openMez(id)}
 
 /* ===================== AVVIO ===================== */
-seedPresenze();
 setupCodeBox();
 initAuth();
 </script>
