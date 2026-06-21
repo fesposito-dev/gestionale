@@ -152,6 +152,11 @@ input,select{font-family:inherit;font-size:16px}
   position:absolute;top:4px;right:4px;min-width:17px;height:17px;padding:0 4px;
   border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;
   display:flex;align-items:center;justify-content:center;border:2px solid var(--petrol);
+  animation:bellpulse 1.8s ease-in-out infinite;
+}
+@keyframes bellpulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(194,59,59,.55)}
+  50%{box-shadow:0 0 0 5px rgba(194,59,59,0)}
 }
 .bell-badge.hidden{display:none}
 .notif-panel{
@@ -898,7 +903,8 @@ async function enterApp(user){
   switchView('archivio');
   render();                 // mostra subito l'interfaccia
   await Promise.all([loadDipendenti(), loadMezzi()]);   // carica dati reali dal database
-  render();                 // ridisegna con i dati reali
+  await loadNotifiche();    // pre-carica scadenze/visite per la campanella
+  render();                 // ridisegna con i dati reali (e accende il pallino)
 }
 
 async function logout(){
@@ -966,26 +972,35 @@ function addMonths(iso,months){
   return d.toISOString().slice(0,10);
 }
 // Raccoglie tutte le scadenze entro 60 giorni o già scadute
+/* dati pre-caricati per le notifiche (così il pallino appare senza aprire le schede) */
+let notifScadenze=[], notifVisite=[];
+async function loadNotifiche(){
+  const [sc, vi] = await Promise.all([
+    sb.from('scadenze').select('tipo,data,mezzo_id'),
+    sb.from('visite').select('tipo,data,dipendente_id')
+  ]);
+  const mezById = Object.fromEntries(mezzi.map(m=>[m.id,m]));
+  const dipById = Object.fromEntries(dipendenti.map(d=>[d.id,d]));
+  notifScadenze=(sc.data||[]).map(r=>{const m=mezById[r.mezzo_id]||{};return {tipo:r.tipo,data:r.data,targa:m.targa||'',marca:m.marca||'',modello:m.modello||''};});
+  notifVisite=(vi.data||[]).map(r=>{const d=dipById[r.dipendente_id]||{};return {tipo:r.tipo,data:r.data,nome:d.nome||'',cognome:d.cognome||''};});
+}
 function getNotifications(){
   const list=[];
-  // scadenze mezzi
-  mezzi.forEach(m=>{
-    m.scadenze.forEach(s=>{
-      const st=scadStatus(s.data);
-      if(st.cls==='late'||st.cls==='soon'){
-        list.push({titolo:`${s.tipo} — ${m.targa}`, sub:`${m.marca} ${m.modello}`, data:s.data, st});
-      }
-    });
+  notifScadenze.forEach(s=>{
+    if(!s.data) return;
+    const st=scadStatus(s.data);
+    if(st.cls==='late'||st.cls==='soon'){
+      list.push({titolo:`${s.tipo} — ${s.targa}`, sub:`${s.marca} ${s.modello}`.trim(), data:s.data, st});
+    }
   });
   // certificati medici: validità 1 anno dalla data della visita
-  dipendenti.forEach(d=>{
-    d.visite.forEach(v=>{
-      const scad=addMonths(v.data,12);
-      const st=scadStatus(scad);
-      if(st.cls==='late'||st.cls==='soon'){
-        list.push({titolo:`Certificato medico — ${d.nome} ${d.cognome}`, sub:v.tipo, data:scad, st});
-      }
-    });
+  notifVisite.forEach(v=>{
+    if(!v.data) return;
+    const scad=addMonths(v.data,12);
+    const st=scadStatus(scad);
+    if(st.cls==='late'||st.cls==='soon'){
+      list.push({titolo:`Certificato medico — ${v.nome} ${v.cognome}`, sub:v.tipo, data:scad, st});
+    }
   });
   // ordina: prima le scadute, poi le più imminenti
   list.sort((a,b)=>new Date(a.data)-new Date(b.data));
@@ -1386,6 +1401,7 @@ async function salvaMezzo(id){
       mezzo_id:id, tipo:x.tipo, data:x.data||null
     })));
   }
+  await loadNotifiche(); refreshBell();
   toast("✓ Scheda salvata");
 }
 
@@ -1449,6 +1465,7 @@ async function salvaDipendente(id){
       dipendente_id:id, mese:x.mese, busta_path:x.busta_path||null, bonifico_path:x.bonifico_path||null
     })));
   }
+  await loadNotifiche(); refreshBell();
   toast("✓ Scheda salvata");
 }
 
