@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Francesco Esposito — App & Web Developer</title>
+  <meta name="description" content="Sviluppo app e siti web su misura per aziende e imprenditori. Trasformo idee in prodotti digitali." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white:   #F5F4F1;
+      --black:   #0A0A0A;
+      --ink:     #1A1A1A;
+      --blue:    #2563EB;
+      --blue-dim:#1D4ED8;
+      --grey:    #6B7280;
+      --line:    #E5E4E0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--white);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(245,244,241,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-logo {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--blue); }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--grey);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: #fff !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+      transition: background 0.2s !important;
+    }
+
+    .nav-cta:hover { background: var(--blue-dim) !important; color: #fff !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 48px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--blue);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(48px, 7vw, 96px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      margin-bottom: 32px;
+      max-width: 800px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--blue);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--grey);
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-primary, .btn-secondary {
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-primary:hover { background: var(--blue); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: none;
+      color: var(--ink);
+      padding: 14px 0;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 2px solid var(--blue);
+      transition: color 0.2s;
+    }
+
+    .btn-secondary:hover { color: var(--blue); }
+
+    /* ── DOMANDA HOOK ── */
+    .hook {
+      background: var(--black);
+      color: var(--white);
+      padding: 100px 48px;
+      text-align: center;
+    }
+
+    .hook h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 5vw, 64px);
+      line-height: 1.1;
+      max-width: 700px;
+      margin: 0 auto 32px;
+      font-weight: 400;
+    }
+
+    .hook p {
+      font-size: 16px;
+      color: #9CA3AF;
+      max-width: 420px;
+      margin: 0 auto 40px;
+    }
+
+    .hook a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--blue);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--blue);
+      padding-bottom: 2px;
+      transition: opacity 0.2s;
+    }
+
+    .hook a:hover { opacity: 0.7; }
+
+    /* ── SERVIZI ── */
+    .services {
+      padding: 100px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--blue);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: 48px;
+      background: var(--blue);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .service-card {
+      background: var(--white);
+      padding: 40px 36px;
+      transition: background 0.2s;
+      cursor: default;
+    }
+
+    .service-card:hover { background: #EFEDE8; }
+
+    .service-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--blue);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .service-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    .service-card p {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.6;
+    }
+
+    /* ── PROGETTI ── */
+    .projects {
+      padding: 100px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .projects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .project-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--line);
+      gap: 24px;
+      color: inherit;
+      transition: padding-left 0.2s;
+      cursor: pointer;
+    }
+
+    .project-item:hover { padding-left: 8px; }
+    .project-item:hover .project-arrow { color: var(--blue); }
+
+    .project-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--grey);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .project-item h3 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .project-item p {
+      font-size: 14px;
+      color: var(--grey);
+    }
+
+    .project-arrow {
+      font-size: 24px;
+      color: var(--line);
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      max-width: 560px;
+      width: 100%;
+      padding: 48px;
+      position: relative;
+      animation: modal-in 0.25s ease;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--grey);
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover { background: var(--line); }
+
+    .modal-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--blue);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .modal h3 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      color: var(--ink);
+    }
+
+    .modal-desc {
+      font-size: 15px;
+      color: var(--grey);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .modal-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      background: var(--line);
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ── CONTATTI ── */
+    .contact {
+      padding: 100px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .contact-left h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 20px;
+      color: var(--ink);
+    }
+
+    .contact-left h2 span { color: var(--blue); }
+
+    .contact-left p {
+      font-size: 15px;
+      color: var(--grey);
+      line-height: 1.7;
+      max-width: 360px;
+    }
+
+    .contact-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-top: 8px;
+    }
+
+    .contact-link {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-decoration: none;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .contact-link:hover { border-color: var(--blue); background: rgba(37,99,235,0.03); }
+
+    .contact-link-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--grey);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .contact-link-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-size: 12px;
+      color: var(--grey);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    footer a {
+      font-size: 12px;
+      color: var(--blue);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+
+      .hero, .services, .projects, .contact { padding-left: 24px; padding-right: 24px; }
+      .hook { padding: 80px 24px; }
+      footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+
+      .contact { grid-template-columns: 1fr; gap: 48px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .project-item { grid-template-columns: 1fr; }
+      .project-arrow { display: none; }
+    }
+
+    /* ── FADE IN ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">FE<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#" onclick="event.preventDefault();document.getElementById('servizi').scrollIntoView({behavior:'smooth'})">Servizi</a></li>
+      <li><a href="#" onclick="event.preventDefault();document.getElementById('progetti').scrollIntoView({behavior:'smooth'})">Progetti</a></li>
+      <li><a href="#" onclick="event.preventDefault();document.getElementById('contatti').scrollIntoView({behavior:'smooth'})" class="nav-cta">Contattami</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow fade-in">App &amp; Web Developer · Campania, Italia</p>
+    <h1 class="fade-in">Trasformo<br>idee in<br><em>prodotti digitali.</em></h1>
+    <p class="hero-sub fade-in">Aiuto aziende e imprenditori a creare siti web, app mobile e software su misura — veloci, funzionali e pronti a convertire.</p>
+    <div class="hero-actions fade-in">
+      <button onclick="document.getElementById('progetti').scrollIntoView({behavior:'smooth'})" class="btn-primary">Guarda i progetti</button>
+      <button onclick="document.getElementById('contatti').scrollIntoView({behavior:'smooth'})" class="btn-secondary">Parliamoci →</button>
+    </div>
+  </section>
+
+  <!-- HOOK -->
+  <section class="hook">
+    <h2 class="fade-in">La tua azienda sta perdendo clienti online?</h2>
+    <p class="fade-in">Un sito lento, un'app assente o una presenza digitale debole ti costano ogni giorno. Possiamo cambiarlo.</p>
+    <a href="#contatti" class="fade-in">francesvopio.esposito@gmail.com</a>
+  </section>
+
+  <!-- SERVIZI -->
+  <section class="services" id="servizi">
+    <div class="section-label">Cosa faccio</div>
+    <div class="services-grid">
+      <div class="service-card fade-in">
+        <span class="service-num">01</span>
+        <h3>Siti Web</h3>
+        <p>Vetrine, e-commerce e landing page ottimizzate per convertire visitatori in clienti. Design su misura, SEO incluso.</p>
+      </div>
+      <div class="service-card fade-in">
+        <span class="service-num">02</span>
+        <h3>App Mobile</h3>
+        <p>Applicazioni Android e iOS custom — dalla prenotazione al catalogo prodotti. Notifiche personalizzate e UX curata.</p>
+      </div>
+      <div class="service-card fade-in">
+        <span class="service-num">03</span>
+        <h3>Software Personalizzati</h3>
+        <p>Gestionali, tool interni e automazioni che eliminano il lavoro manuale ripetitivo e fanno guadagnare tempo.</p>
+      </div>
+      <div class="service-card fade-in">
+        <span class="service-num">04</span>
+        <h3>Social &amp; Branding</h3>
+        <p>Creazione logo, gestione grafiche e rebranding totale. Identità visiva coerente su tutti i canali.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGETTI -->
+  <section class="projects" id="progetti">
+    <div class="section-label">Progetti recenti</div>
+    <div class="projects-list">
+
+      <div class="project-item fade-in" onclick="openModal('tendaggi')">
+        <div>
+          <p class="project-tag">SITO WEB · TAPPEZZERIA &amp; TENDAGGI</p>
+          <h3>Armonie Tendaggi</h3>
+          <p>Sito vetrina con form preventivo diretto — artigiani dal 1984, Arzano (NA)</p>
+        </div>
+        <span class="project-arrow">→</span>
+      </div>
+
+      <div class="project-item fade-in" onclick="openModal('gestionale')">
+        <div>
+          <p class="project-tag">SOFTWARE GESTIONALE · IN SVILUPPO</p>
+          <h3>Gestionale Dipendenti &amp; Veicoli</h3>
+          <p>Sistema interno per la gestione del personale, dei turni e del parco veicoli aziendale</p>
+        </div>
+        <span class="project-arrow">→</span>
+      </div>
+
+      <div class="project-item fade-in" onclick="openModal('barbiere')">
+        <div>
+          <p class="project-tag">APP MOBILE · PRENOTAZIONI</p>
+          <h3>App Barbiere Custom</h3>
+          <p>Applicazione scaricabile con prenotazioni, notifiche push e personalizzazione completa</p>
+        </div>
+        <span class="project-arrow">→</span>
+      </div>
+
+      <div class="project-item fade-in" onclick="openModal('social')">
+        <div>
+          <p class="project-tag">SOCIAL MEDIA · BRAND ARTIGIANALE</p>
+          <h3>Gestione Social Creazioni</h3>
+          <p>Creazione logo, grafiche e gestione profilo per brand di borse e creazioni fatte a mano</p>
+        </div>
+        <span class="project-arrow">→</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal-box">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <p class="modal-tag" id="modal-tag"></p>
+      <h3 id="modal-title"></h3>
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="modal-pills" id="modal-pills"></div>
+    </div>
+  </div>
+
+  <!-- CONTATTI -->
+  <section class="contact" id="contatti">
+    <div class="contact-left fade-in">
+      <h2>Parliamo del<br>tuo <span>progetto.</span></h2>
+      <p>Che tu abbia un'idea vaga o un brief dettagliato — scrivimi. Rispondo entro 24 ore e la prima consulenza è gratuita.</p>
+    </div>
+    <div class="contact-right fade-in">
+      <a class="contact-link" href="https://wa.me/393312734798" target="_blank" rel="noopener">
+        <span class="contact-link-label">WhatsApp</span>
+        <span class="contact-link-value">+39 331 273 4798</span>
+      </a>
+      <a class="contact-link" href="mailto:francesvopio.esposito@gmail.com">
+        <span class="contact-link-label">Email</span>
+        <span class="contact-link-value">francesvopio.esposito@gmail.com</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Francesco Esposito</p>
+    <a href="mailto:francesvopio.esposito@gmail.com">francesvopio.esposito@gmail.com</a>
+  </footer>
+
+  <script>
+    // Fade in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Project data
+    const projects = {
+      tendaggi: {
+        tag: 'Sito Web · Tappezzeria & Tendaggi',
+        title: 'Armonie Tendaggi',
+        desc: 'Sito vetrina professionale per una storica azienda di tappezzeria e tendaggi ad Arzano (NA), attiva dal 1984. Include una sezione lavori, pagina chi siamo e un form di richiesta preventivo direttamente dal sito — niente telefonate inutili, solo lead qualificati.',
+        pills: ['HTML/CSS', 'JavaScript', 'Form Preventivo', 'SEO', 'Design Custom']
+      },
+      gestionale: {
+        tag: 'Software Gestionale · In Sviluppo',
+        title: 'Gestionale Dipendenti & Veicoli',
+        desc: 'Sistema gestionale interno su misura per un\'azienda cliente. Permette di gestire il personale, i turni, le assegnazioni ai veicoli aziendali e lo storico degli interventi — tutto da un\'unica dashboard. Progetto attualmente in fase di sviluppo attivo.',
+        pills: ['Dashboard Web', 'Gestione Personale', 'Parco Veicoli', 'Database', 'Su misura']
+      },
+      barbiere: {
+        tag: 'App Mobile · Prenotazioni',
+        title: 'App Barbiere Custom',
+        desc: 'Applicazione mobile scaricabile (Android/iOS) sviluppata su misura per una barberia. Il cliente finale può prenotare il proprio slot direttamente dall\'app, ricevere notifiche push di promemoria e il titolare gestisce il calendario in tempo reale. Personalizzazione grafica completa con i colori e il brand del barbiere.',
+        pills: ['App Mobile', 'Android & iOS', 'Notifiche Push', 'Prenotazioni', 'Personalizzazione']
+      },
+      social: {
+        tag: 'Social Media · Brand Artigianale',
+        title: 'Gestione Social Creazioni',
+        desc: 'Gestione completa dell\'identità digitale per un brand di creazioni fatte a mano — borse, accessori e filato. Incluso: creazione del logo, setup del profilo Instagram, gestione delle grafiche per i post e le stories, e rebranding totale dell\'immagine online.',
+        pills: ['Logo Design', 'Instagram', 'Grafiche', 'Rebranding', 'Identità Visiva']
+      }
+    };
+
+    function openModal(key) {
+      const p = projects[key];
+      document.getElementById('modal-tag').textContent = p.tag;
+      document.getElementById('modal-title').textContent = p.title;
+      document.getElementById('modal-desc').textContent = p.desc;
+      document.getElementById('modal-pills').innerHTML = p.pills.map(t => `<span class="pill">${t}</span>`).join('');
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+    }
+
+    function closeModalDirect() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+  </script>
+
+</body>
+</html>
