@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Gestionale</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Archivo:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   GESTIONALE — PROTOTIPO DIMOSTRATIVO
+   I dati sono di esempio e non vengono salvati in modo permanente.
+   Per cambiare il nome azienda: cerca "GESTIONALE" nel codice HTML.
+   ============================================================ */
+
+:root{
+  --bg:#eef1f4;
+  --surface:#ffffff;
+  --ink:#10222c;
+  --ink-soft:#56707d;
+  --line:#dde4e9;
+  --line-soft:#eaeff2;
+  --petrol:#0e4d5e;
+  --petrol-dark:#0a3a47;
+  --petrol-tint:#e4eef0;
+  --amber:#e07a23;
+  --amber-tint:#fbeede;
+  --green:#1f8a5b;
+  --green-tint:#e1f1e9;
+  --red:#c23b3b;
+  --red-tint:#f8e4e4;
+  --radius:16px;
+  --radius-sm:11px;
+  --shadow:0 1px 2px rgba(16,34,44,.06),0 6px 22px rgba(16,34,44,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.45;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select{font-family:inherit;font-size:16px}
+.hidden{display:none!important}
+
+/* ---------- LOGIN ---------- */
+#login{
+  min-height:100dvh;display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(14,77,94,.18), transparent 70%),
+    var(--bg);
+}
+.login-card{
+  width:100%;max-width:380px;background:var(--surface);
+  border-radius:24px;box-shadow:var(--shadow);
+  padding:38px 30px 30px;text-align:center;
+  border:1px solid var(--line);
+}
+.brand{
+  font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-.02em;
+  font-size:13px;color:var(--petrol);text-transform:uppercase;
+  letter-spacing:.18em;margin-bottom:6px;
+}
+.login-card h1{
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;
+  letter-spacing:-.02em;margin:0 0 6px;
+}
+.login-sub{color:var(--ink-soft);font-size:14px;margin:0 0 26px}
+.login-label{font-size:12px;font-weight:600;color:var(--ink-soft);
+  text-align:left;display:block;margin:0 0 9px;text-transform:uppercase;letter-spacing:.05em}
+.soci{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.socio-btn{
+  display:flex;align-items:center;gap:13px;width:100%;
+  padding:13px 15px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface);text-align:left;transition:.15s;
+}
+.socio-btn:hover{border-color:var(--petrol);background:var(--petrol-tint)}
+.avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:15px;color:#fff;background:var(--petrol);
+}
+.socio-btn .nm{font-weight:600;font-size:15px}
+.socio-btn .rl{font-size:12px;color:var(--ink-soft)}
+.login-note{font-size:12px;color:var(--ink-soft);margin-top:14px;line-height:1.5}
+
+/* login form fields */
+.login-field{text-align:left;margin-bottom:14px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.05em;margin:0 0 7px}
+.login-field input{
+  width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--ink);outline:none;transition:.15s;
+}
+.login-field input:focus{border-color:var(--petrol)}
+.login-btn{
+  width:100%;padding:14px;border-radius:var(--radius-sm);background:var(--petrol);color:#fff;
+  font-weight:700;font-size:15px;transition:.15s;margin-top:4px;
+}
+.login-btn:hover{background:var(--petrol-dark)}
+.login-err{color:var(--red);font-size:13px;font-weight:600;text-align:left;margin:0 0 12px;min-height:0}
+.code-box{
+  display:flex;gap:8px;justify-content:center;margin:8px 0 16px;
+}
+.code-box input{
+  width:46px;height:56px;text-align:center;font-size:24px;font-weight:700;
+  border:1.5px solid var(--line);border-radius:12px;background:var(--surface);
+  color:var(--ink);outline:none;transition:.15s;
+}
+.code-box input:focus{border-color:var(--petrol)}
+.lock-ic{
+  width:54px;height:54px;border-radius:50%;background:var(--petrol-tint);color:var(--petrol);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+.link-btn{background:none;color:var(--petrol);font-weight:600;font-size:13px;
+  margin-top:14px;text-decoration:underline}
+.trust-row{display:flex;align-items:center;gap:9px;justify-content:center;
+  font-size:13px;color:var(--ink-soft);margin-top:4px;cursor:pointer;user-select:none}
+.trust-row input{width:17px;height:17px;accent-color:var(--petrol)}
+
+/* ---------- APP SHELL ---------- */
+#app{min-height:100dvh;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:30;
+  background:var(--petrol);color:#fff;
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  padding-top:max(14px,env(safe-area-inset-top));
+}
+.topbar .tb-brand{font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:.04em;font-size:16px}
+.tb-user{display:flex;align-items:center;gap:9px}
+.tb-user .av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.tb-logout{color:rgba(255,255,255,.85);font-size:13px;font-weight:600;
+  padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.25)}
+.tb-logout:hover{background:rgba(255,255,255,.12)}
+
+/* ---------- CAMPANELLA NOTIFICHE ---------- */
+.bell{
+  position:relative;width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  transition:.15s;
+}
+.bell:hover{background:rgba(255,255,255,.14)}
+.bell-badge{
+  position:absolute;top:4px;right:4px;min-width:17px;height:17px;padding:0 4px;
+  border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--petrol);
+  animation:bellpulse 1.8s ease-in-out infinite;
+}
+@keyframes bellpulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(194,59,59,.55)}
+  50%{box-shadow:0 0 0 5px rgba(194,59,59,0)}
+}
+.bell-badge.hidden{display:none}
+.notif-panel{
+  position:absolute;top:58px;right:14px;width:340px;max-width:calc(100vw - 24px);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:0 12px 40px rgba(16,34,44,.18);z-index:40;overflow:hidden;
+  transform-origin:top right;
+}
+.notif-panel.hidden{display:none}
+.notif-head{
+  padding:14px 16px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.notif-head h3{font-family:'Archivo',sans-serif;font-size:15px;font-weight:700;margin:0;flex:1}
+.notif-head .cnt{font-size:12px;font-weight:700;color:var(--red);background:var(--red-tint);
+  padding:3px 9px;border-radius:20px}
+.notif-list{max-height:60vh;overflow-y:auto}
+.notif-item{
+  display:flex;gap:11px;padding:13px 16px;border-bottom:1px solid var(--line-soft);align-items:flex-start;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item .dot{margin-top:5px}
+.notif-item .nt{flex:1}
+.notif-item .nt b{display:block;font-size:14px;font-weight:600}
+.notif-item .nt span{font-size:12.5px;color:var(--ink-soft)}
+.notif-item .when{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-top:1px}
+.notif-empty{padding:30px 20px;text-align:center;color:var(--ink-soft);font-size:14px}
+.notif-overlay{position:fixed;inset:0;z-index:39}
+
+/* ---------- PULSANTE SCARICA SCHEDA ---------- */
+.download-bar{margin-bottom:14px}
+.download-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:14px;border-radius:var(--radius);background:var(--ink);color:#fff;
+  font-weight:700;font-size:15px;box-shadow:var(--shadow);transition:.15s;
+}
+.download-btn:hover{background:#1d3a47}
+.download-btn small{font-weight:500;opacity:.7;font-size:12px}
+
+/* ---------- PULSANTE INVIA BUSTA ---------- */
+.send-btn{
+  display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;
+  padding:8px 13px;border-radius:9px;background:var(--petrol);color:#fff;transition:.15s;
+  white-space:nowrap;
+}
+.send-btn:hover{background:var(--petrol-dark)}
+.send-btn:disabled{background:var(--line);color:var(--ink-soft);cursor:not-allowed}
+
+/* ---------- NAV IN BASSO (stile app) ---------- */
+.bottom-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:35;
+  background:var(--surface);border-top:1px solid var(--line);
+  display:flex;padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -2px 16px rgba(16,34,44,.06);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 4px 8px;color:var(--ink-soft);font-size:11px;font-weight:600;transition:.15s;
+}
+.nav-item svg{width:22px;height:22px}
+.nav-item.active{color:var(--petrol)}
+.nav-item.active svg{stroke:var(--petrol)}
+
+/* ---------- PRESENZE ---------- */
+.day-head{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.day-head .dh-date{font-family:'Archivo',sans-serif;font-weight:700;font-size:16px}
+.day-head .dh-sub{font-size:12px;color:var(--ink-soft)}
+.pres-summary{display:flex;gap:7px;flex-wrap:wrap}
+.pres-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.pres-pill.p-pres{color:var(--green);background:var(--green-tint)}
+.pres-pill.p-ass{color:var(--ink-soft);background:var(--line-soft)}
+.pres-row{
+  display:flex;align-items:center;gap:12px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;
+  margin-bottom:9px;box-shadow:var(--shadow);flex-wrap:wrap;
+}
+.pres-row .pr-name{font-weight:700;font-size:15px;flex:1;min-width:120px}
+.pres-opts{display:flex;gap:6px;flex-wrap:wrap}
+.pres-opt{
+  font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:9px;
+  border:1.5px solid var(--line);color:var(--ink-soft);background:var(--surface);transition:.12s;
+}
+.pres-opt.on[data-s="Presente"]{background:var(--green);border-color:var(--green);color:#fff}
+.pres-opt.on[data-s="Ferie"]{background:#2f74c0;border-color:#2f74c0;color:#fff}
+.pres-opt.on[data-s="Malattia"]{background:var(--amber);border-color:var(--amber);color:#fff}
+.pres-opt.on[data-s="Permesso"]{background:#7a59c2;border-color:#7a59c2;color:#fff}
+.pres-opt.on[data-s="Assente"]{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ---------- PRODUZIONE ---------- */
+.subtabs{display:flex;gap:8px;margin-bottom:16px}
+.subtab{
+  flex:1;padding:11px;border-radius:11px;border:1.5px solid var(--line);
+  background:var(--surface);font-weight:600;font-size:14px;color:var(--ink-soft);transition:.15s;
+}
+.subtab.active{background:var(--petrol);color:#fff;border-color:var(--petrol)}
+.squad{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden;
+}
+.squad-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;background:var(--petrol-tint);border-bottom:1px solid var(--line-soft);
+}
+.squad-head .sq-title{font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;color:var(--petrol);
+  display:flex;align-items:center;gap:8px}
+.squad-head .sq-num{width:26px;height:26px;border-radius:7px;background:var(--petrol);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px}
+.squad-body{padding:14px 16px}
+.squad-body .field{margin-bottom:12px}
+.squad-body .field:last-child{margin-bottom:0}
+.squad-body textarea{
+  width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--surface);color:var(--ink);outline:none;font-family:inherit;font-size:15px;
+  resize:vertical;min-height:64px;line-height:1.4;
+}
+.squad-body textarea:focus{border-color:var(--petrol)}
+.register-btn{
+  width:100%;padding:15px;border-radius:var(--radius);background:var(--green);color:#fff;
+  font-weight:700;font-size:15px;box-shadow:var(--shadow);transition:.15s;margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.register-btn:hover{background:#196e48}
+.uscita-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:15px 16px;margin-bottom:11px;box-shadow:var(--shadow);
+}
+.uscita-card .uc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:6px}
+.uscita-card .uc-date{font-family:'Archivo',sans-serif;font-weight:700;font-size:15px}
+.uscita-card .uc-sq{font-size:12px;font-weight:700;color:var(--petrol);background:var(--petrol-tint);
+  padding:3px 10px;border-radius:20px}
+.uc-line{display:flex;gap:8px;font-size:14px;margin-bottom:5px;align-items:flex-start}
+.uc-line .uc-lbl{font-weight:600;color:var(--ink-soft);min-width:88px;flex-shrink:0}
+.uc-line .uc-val{flex:1}
+.uc-line .uc-val .plate{font-size:11px}
+
+/* ---------- STORICO PRESENZE ---------- */
+.pres-filter{margin-bottom:14px}
+.pres-filter label{display:block;font-size:11px;font-weight:600;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.05em;margin:0 0 7px}
+.pres-filter select{
+  width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--surface);color:var(--ink);outline:none;font-weight:600;
+}
+.pres-filter select:focus{border-color:var(--petrol)}
+.count-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.count-box{
+  flex:1;min-width:80px;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:12px 10px;text-align:center;box-shadow:var(--shadow);
+}
+.count-box .cn{font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;line-height:1}
+.count-box .cl{font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:3px}
+.count-box.c-pres .cn{color:var(--green)}
+.count-box.c-fer .cn{color:#2f74c0}
+.count-box.c-mal .cn{color:var(--amber)}
+.count-box.c-perm .cn{color:#7a59c2}
+.count-box.c-ass .cn{color:var(--red)}
+.pres-day{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:11px;box-shadow:var(--shadow);overflow:hidden;
+}
+.pres-day-head{
+  padding:11px 16px;background:var(--petrol-tint);border-bottom:1px solid var(--line-soft);
+  font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:var(--petrol);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pres-day-head .pd-cnt{font-size:12px;font-weight:600;color:var(--ink-soft)}
+.pres-day-body{padding:6px 16px 10px}
+.pd-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.pd-row:last-child{border-bottom:none}
+.pd-row .pd-name{font-weight:600;font-size:14px}
+.st-badge{font-size:12px;font-weight:700;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.st-badge[data-s="Presente"]{color:var(--green);background:var(--green-tint)}
+.st-badge[data-s="Ferie"]{color:#2f74c0;background:#e2eef9}
+.st-badge[data-s="Malattia"]{color:var(--amber);background:var(--amber-tint)}
+.st-badge[data-s="Permesso"]{color:#7a59c2;background:#ece5f7}
+.st-badge[data-s="Assente"]{color:var(--red);background:var(--red-tint)}
+
+.wrap{width:100%;max-width:780px;margin:0 auto;padding:18px 16px 90px;flex:1}
+
+/* ---------- SEARCH ---------- */
+.search-box{position:relative;margin-bottom:14px}
+.search-box svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-soft)}
+#search{
+  width:100%;padding:15px 15px 15px 46px;border-radius:14px;
+  border:1.5px solid var(--line);background:var(--surface);
+  font-size:16px;box-shadow:var(--shadow);outline:none;transition:.15s;
+}
+#search:focus{border-color:var(--petrol)}
+.filters{display:flex;gap:8px;margin-bottom:18px}
+.chip{
+  flex:1;padding:10px;border-radius:11px;border:1.5px solid var(--line);
+  background:var(--surface);font-weight:600;font-size:14px;color:var(--ink-soft);
+  transition:.15s;
+}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:22px 2px 11px}
+.section-head h2{font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0}
+.add-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--petrol-tint);color:var(--petrol);font-weight:600;font-size:13px;
+  padding:8px 13px;border-radius:10px;transition:.15s;
+}
+.add-btn:hover{background:var(--petrol);color:#fff}
+
+/* ---------- CARDS LIST ---------- */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{
+  display:flex;align-items:center;gap:14px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:15px 16px;box-shadow:var(--shadow);transition:.15s;cursor:pointer;
+}
+.card:hover{transform:translateY(-1px);border-color:var(--petrol)}
+.card .ic{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.card.dip .ic{background:var(--petrol-tint);color:var(--petrol)}
+.card.mez .ic{background:var(--amber-tint);color:var(--amber)}
+.card .main{flex:1;min-width:0}
+.card .ttl{font-weight:700;font-size:16px;letter-spacing:-.01em}
+.card .meta{font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .chev{color:var(--line);flex-shrink:0}
+.plate{
+  font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.06em;
+  background:#10222c;color:#fff;border-radius:5px;padding:3px 7px;font-size:12px;
+  display:inline-block;
+}
+.badge-warn{font-size:11px;font-weight:700;color:var(--red);background:var(--red-tint);
+  padding:3px 8px;border-radius:20px;margin-left:6px;white-space:nowrap}
+.empty{text-align:center;color:var(--ink-soft);padding:40px 20px;font-size:14px}
+
+/* ---------- DETAIL OVERLAY ---------- */
+#detail{
+  position:fixed;inset:0;z-index:50;background:var(--bg);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+}
+#detail.open{transform:translateX(0)}
+.detail-top{
+  position:sticky;top:0;z-index:5;background:var(--petrol);color:#fff;
+  padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));
+  display:flex;align-items:center;gap:12px;
+}
+.back-btn{display:flex;align-items:center;gap:5px;color:#fff;font-weight:600;font-size:15px}
+.detail-top .dt-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:17px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.del-btn{color:rgba(255,255,255,.9);font-size:13px;font-weight:600;
+  padding:7px 11px;border:1px solid rgba(255,255,255,.3);border-radius:9px}
+.del-btn:hover{background:var(--red);border-color:var(--red)}
+
+.detail-body{max-width:780px;margin:0 auto;padding:16px 16px 60px}
+.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden;
+}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 16px;border-bottom:1px solid var(--line-soft);
+}
+.panel-head h3{font-family:'Archivo',sans-serif;font-size:15px;font-weight:700;margin:0;
+  display:flex;align-items:center;gap:9px}
+.panel-head .pic{width:26px;height:26px;border-radius:7px;background:var(--petrol-tint);
+  color:var(--petrol);display:flex;align-items:center;justify-content:center}
+.panel-body{padding:8px 16px 16px}
+
+/* anagrafica fields */
+.field-row{display:flex;gap:10px;flex-wrap:wrap;padding-top:8px}
+.field{flex:1;min-width:130px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.05em;margin:0 0 5px}
+.field input,.field select{
+  width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--surface);color:var(--ink);outline:none;transition:.15s;
+}
+.field input:focus,.field select:focus{border-color:var(--petrol)}
+
+/* repeatable item rows */
+.item{
+  display:flex;align-items:center;gap:10px;padding:11px 0;
+  border-bottom:1px solid var(--line-soft);flex-wrap:wrap;
+}
+.item:last-child{border-bottom:none}
+.item .grow{flex:1;min-width:120px;display:flex;flex-direction:column;gap:6px}
+.item input,.item select{
+  padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;
+  background:var(--surface);width:100%;outline:none;
+}
+.item input:focus,.item select:focus{border-color:var(--petrol)}
+.item .inline-lbl{font-size:11px;color:var(--ink-soft);font-weight:600}
+.rm{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  background:var(--red-tint);color:var(--red);font-size:20px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.rm:hover{background:var(--red);color:#fff}
+
+/* quantity stepper */
+.stepper{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);
+  border-radius:10px;overflow:hidden;width:fit-content}
+.stepper button{width:38px;height:40px;font-size:20px;font-weight:700;color:var(--petrol);
+  background:var(--petrol-tint);display:flex;align-items:center;justify-content:center;line-height:1}
+.stepper button:hover{background:var(--petrol);color:#fff}
+.stepper .qval{width:44px;text-align:center;font-weight:700;font-size:16px}
+
+/* buste paga */
+.busta{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.busta:last-child{border-bottom:none}
+.busta .mese{font-weight:700;min-width:120px}
+.file-pill{
+  display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;
+  padding:8px 12px;border-radius:9px;border:1.5px dashed var(--line);
+  color:var(--ink-soft);background:var(--surface);transition:.15s;
+}
+.file-pill.has{border-style:solid;border-color:var(--green);background:var(--green-tint);color:var(--green)}
+.file-pill:hover{border-color:var(--petrol);color:var(--petrol)}
+
+/* scadenze traffic light */
+.scad{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.scad:last-child{border-bottom:none}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:var(--green)}
+.dot.soon{background:var(--amber)}
+.dot.late{background:var(--red)}
+.scad .grow{flex:1;min-width:120px;display:flex;flex-direction:column;gap:6px}
+.scad-status{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.scad-status.ok{color:var(--green);background:var(--green-tint)}
+.scad-status.soon{color:var(--amber);background:var(--amber-tint)}
+.scad-status.late{color:var(--red);background:var(--red-tint)}
+
+.add-line{
+  display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  color:var(--petrol);font-weight:600;font-size:14px;
+  padding:9px 13px;border-radius:10px;background:var(--petrol-tint);transition:.15s;
+}
+.add-line:hover{background:var(--petrol);color:#fff}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;
+  font-size:14px;font-weight:600;z-index:100;opacity:0;transition:.3s;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:90vw;text-align:center;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+.demo-banner{
+  background:var(--amber-tint);color:#8a4a10;font-size:12px;font-weight:600;
+  text-align:center;padding:7px;border-bottom:1px solid #f0d9c0;
+}
+
+/* ============================================================
+   MOBILE — schermi piccoli (telefono)
+   Stesso look, ma i campi si impilano e i tocchi sono più comodi.
+   ============================================================ */
+@media (max-width:560px){
+  .wrap{padding:14px 12px 90px}
+  .detail-body{padding:14px 12px 60px}
+
+  /* righe dei dettagli: ogni campo va a tutta larghezza, impilato */
+  .item{
+    gap:10px;padding:14px 0;position:relative;
+    align-items:stretch;
+  }
+  .item .grow,
+  .item .grow[style]{max-width:none!important;width:100%;min-width:0}
+  .item input,.item select{width:100%}
+
+  /* lo stepper quantità a tutta riga */
+  .item .stepper{width:100%}
+  .item .stepper .qval{flex:1}
+  .item > div[style*="flex-direction:column"]{width:100%}
+
+  /* il pulsante rimuovi (−) va in alto a destra della riga, ben visibile */
+  .item .rm{
+    position:absolute;top:14px;right:0;width:32px;height:32px;
+  }
+  .item .grow:first-child{padding-right:42px}
+
+  /* anagrafica: un campo per riga */
+  .field-row{flex-direction:column;gap:12px}
+  .field{min-width:0;width:100%}
+
+  /* buste paga: impilate */
+  .busta{gap:9px;position:relative;padding-right:42px}
+  .busta .mese{min-width:0;width:100%;font-size:15px}
+  .file-pill{flex:1;justify-content:center}
+  .busta .rm{position:absolute;top:13px;right:0}
+
+  /* scadenze: il semaforo e lo stato restano in linea, i campi sotto */
+  .scad{gap:9px;position:relative;padding-right:42px;align-items:flex-start}
+  .scad .grow,.scad .grow[style]{max-width:none!important;width:100%}
+  .scad-status{order:3}
+  .scad .rm{position:absolute;top:12px;right:0}
+
+  /* schede in lista: niente troncamento brutto del testo */
+  .card{padding:14px}
+  .card .meta{white-space:normal}
+
+  /* login un filo più compatto */
+  .login-card{padding:30px 22px 26px}
+  .code-box input{width:42px;height:52px;font-size:22px}
+
+  /* presenze e produzione su mobile */
+  .pres-row .pr-name{flex:none;width:100%}
+  .pres-opts{width:100%}
+  .pres-opt{flex:1;text-align:center;padding:8px 6px}
+  .uc-line .uc-lbl{min-width:80px}
+  .notif-panel{right:8px;top:54px}
+}
+
+/* schermi molto stretti (iPhone mini / SE) */
+@media (max-width:380px){
+  .code-box{gap:6px}
+  .code-box input{width:38px;height:48px;font-size:20px}
+  .filters .chip{font-size:13px;padding:9px 4px}
+  .file-pill{font-size:12px;padding:8px 9px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login">
+  <div class="login-card">
+    <div class="brand">Gestionale</div>
+
+    <!-- STEP 1: email -->
+    <div id="loginStep1">
+      <h1>Accesso riservato</h1>
+      <p class="login-sub">Inserisci la tua email aziendale</p>
+      <p class="login-err" id="loginErr"></p>
+      <div class="login-field">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="nome@azienda.it" autocomplete="username" inputmode="email">
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Invia codice di accesso</button>
+      <p class="login-note">Riceverai un codice via email da inserire. Possono accedere solo i soci autorizzati.</p>
+    </div>
+
+    <!-- STEP 2: codice 2FA -->
+    <div id="loginStep2" class="hidden">
+      <div class="lock-ic">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h1>Codice di accesso</h1>
+      <p class="login-sub">Inserisci il codice a 6 cifre<br>che hai ricevuto via email</p>
+      <p class="login-err" id="codeErr"></p>
+      <div class="code-box" id="codeBox">
+        <input maxlength="1" inputmode="numeric" data-i="0">
+        <input maxlength="1" inputmode="numeric" data-i="1">
+        <input maxlength="1" inputmode="numeric" data-i="2">
+        <input maxlength="1" inputmode="numeric" data-i="3">
+        <input maxlength="1" inputmode="numeric" data-i="4">
+        <input maxlength="1" inputmode="numeric" data-i="5">
+      </div>
+      <label class="trust-row">
+        <input type="checkbox" id="trustDevice" checked>
+        Ricorda questo dispositivo
+      </label>
+      <button class="login-btn" onclick="doVerify()">Verifica ed entra</button>
+      <button class="link-btn" onclick="backToStep1()">← Torna indietro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <span class="tb-brand">GESTIONALE</span>
+    <div class="tb-user">
+      <button class="bell" onclick="toggleNotif(event)" aria-label="Notifiche">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="bell-badge hidden" id="bellBadge">0</span>
+      </button>
+      <span class="av" id="userAv">—</span>
+      <button class="tb-logout" onclick="logout()">Esci</button>
+    </div>
+  </div>
+
+  <!-- pannello notifiche -->
+  <div class="notif-overlay hidden" id="notifOverlay" onclick="closeNotif()"></div>
+  <div class="notif-panel hidden" id="notifPanel">
+    <div class="notif-head">
+      <h3>Scadenze</h3>
+      <span class="cnt" id="notifCnt">0</span>
+    </div>
+    <div class="notif-list" id="notifList"></div>
+  </div>
+
+  <div class="wrap">
+    <!-- ===== VISTA ARCHIVIO (ricerca dipendenti + mezzi) ===== -->
+    <div id="viewArchivio">
+      <div class="search-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search" placeholder="Cerca per nome, cognome o targa…" oninput="render()" autocomplete="off">
+      </div>
+      <div class="filters">
+        <button class="chip active" data-f="all" onclick="setFilter('all')">Tutti</button>
+        <button class="chip" data-f="dip" onclick="setFilter('dip')">Dipendenti</button>
+        <button class="chip" data-f="mez" onclick="setFilter('mez')">Mezzi</button>
+      </div>
+
+      <div id="dipSection">
+        <div class="section-head">
+          <h2>Dipendenti</h2>
+          <button class="add-btn" onclick="addDipendente()">＋ Aggiungi</button>
+        </div>
+        <div class="cards" id="dipCards"></div>
+      </div>
+
+      <div id="mezSection">
+        <div class="section-head">
+          <h2>Mezzi</h2>
+          <button class="add-btn" onclick="addMezzo()">＋ Aggiungi</button>
+        </div>
+        <div class="cards" id="mezCards"></div>
+      </div>
+    </div>
+
+    <!-- ===== VISTA PRESENZE ===== -->
+    <div id="viewPresenze" class="hidden">
+      <div class="subtabs">
+        <button class="subtab active" data-pt="oggi" onclick="setPresTab('oggi')">Presenze di oggi</button>
+        <button class="subtab" data-pt="storico" onclick="setPresTab('storico')">Storico</button>
+      </div>
+
+      <!-- sottosezione: oggi -->
+      <div id="presOggi">
+        <div class="day-head">
+          <div>
+            <div class="dh-date" id="presDate">Oggi</div>
+            <div class="dh-sub">Presenza giornaliera</div>
+          </div>
+          <div class="pres-summary" id="presSummary"></div>
+        </div>
+        <div id="presList"></div>
+        <button class="register-btn" onclick="registraPresenze()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          Registra le presenze di oggi
+        </button>
+      </div>
+
+      <!-- sottosezione: storico -->
+      <div id="presStorico" class="hidden">
+        <div class="pres-filter">
+          <label>Mostra</label>
+          <select id="presFilter" onchange="renderStoricoPresenze()"></select>
+        </div>
+        <div id="presCounts"></div>
+        <div id="presHistory"></div>
+      </div>
+    </div>
+
+    <!-- ===== VISTA PRODUZIONE ===== -->
+    <div id="viewProduzione" class="hidden">
+      <div class="subtabs">
+        <button class="subtab active" data-t="oggi" onclick="setProdTab('oggi')">Squadre di oggi</button>
+        <button class="subtab" data-t="storico" onclick="setProdTab('storico')">Archivio uscite</button>
+      </div>
+
+      <!-- sottosezione: squadre di oggi -->
+      <div id="prodOggi">
+        <div class="day-head">
+          <div>
+            <div class="dh-date" id="prodDate">Oggi</div>
+            <div class="dh-sub"><span id="squadCount">0</span> squadre in uscita</div>
+          </div>
+          <button class="add-btn" onclick="addSquadra()">＋ Squadra</button>
+        </div>
+        <div id="squadList"></div>
+        <button class="register-btn" onclick="registraGiornata()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          Registra la giornata
+        </button>
+      </div>
+
+      <!-- sottosezione: archivio uscite -->
+      <div id="prodStorico" class="hidden">
+        <div class="search-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="usciteSearch" placeholder="Cerca per assistente…" oninput="renderStorico()" autocomplete="off">
+        </div>
+        <div id="usciteList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NAVIGAZIONE IN BASSO ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-v="archivio" onclick="switchView('archivio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2M4 7v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7"/><path d="M10 11h4"/></svg>
+      Archivio
+    </button>
+    <button class="nav-item" data-v="presenze" onclick="switchView('presenze')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Presenze
+    </button>
+    <button class="nav-item" data-v="produzione" onclick="switchView('produzione')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7-4-7 4"/><path d="M2 20V12l5-3"/><path d="M10 22v-6h4v6"/></svg>
+      Produzione
+    </button>
+  </nav>
+</div>
+
+<!-- ===================== DETTAGLIO ===================== -->
+<div id="detail">
+  <div class="detail-top">
+    <button class="back-btn" onclick="closeDetail()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Indietro
+    </button>
+    <span class="dt-name" id="dtName"></span>
+    <button class="del-btn" onclick="deleteCurrent()">Elimina</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===================== DATI DI ESEMPIO ===================== */
+const SOCI = [
+  {id:1, nome:"Andrea Monti", ruolo:"Socio amministratore"},
+  {id:2, nome:"Marco De Luca", ruolo:"Socio"},
+  {id:3, nome:"Paolo Greco", ruolo:"Socio"},
+];
+
+// I dipendenti vengono caricati da Supabase all'avvio (parte vuoto)
+let dipendenti = [];
+
+// I mezzi vengono caricati da Supabase all'avvio (parte vuoto)
+let mezzi = [];
+
+const TAGLIE = {
+  Maglia:["XS","S","M","L","XL","XXL","XXXL"],
+  Pantalone:["44","46","48","50","52","54","56","58"],
+  Scarpe:["38","39","40","41","42","43","44","45","46"],
+};
+const STATI_PRESENZA = ["Presente","Ferie","Malattia","Permesso","Assente"];
+
+// squadre in costruzione per oggi
+// squadre in costruzione per oggi (parte vuoto, il socio le aggiunge)
+let squadreOggi = [];
+
+// archivio uscite registrate — caricato da Supabase
+let uscite = [];
+
+// registro presenze storico — popolato all'avvio con i giorni passati
+let registroPresenze = [];
+const TIPI_DOT = ["Maglia","Pantalone","Scarpe"];
+const TIPI_INT = ["Controllo","Sostituzione","Riparazione","Manutenzione"];
+const TIPI_SCAD = ["Revisione","Collaudo","Assicurazione","Bollo","Tagliando"];
+const VALIDITA_CORSO = [{v:1,l:"1 anno"},{v:2,l:"2 anni"},{v:3,l:"3 anni"},{v:5,l:"5 anni"},{v:0,l:"Non scade"}];
+
+/* ===================== STATO ===================== */
+let filter="all";
+let current=null;      // {type:'dip'|'mez', id}
+let nextDipId=4, nextMezId=3;
+
+/* ===================== SUPABASE ===================== */
+const SUPABASE_URL = 'https://gjzimwridzadotasgrad.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_469w-b5qxCDRkVESOslV4A_5Y3p5sAP';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ===================== LOGIN (codice via email) ===================== */
+let pendingUser=null;
+
+async function doLogin(){
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const err=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
+  err.textContent="";
+  if(!email || !email.includes('@')){
+    err.textContent="Inserisci un'email valida.";
+    return;
+  }
+  btn.disabled=true; btn.textContent="Invio in corso…";
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options:{ shouldCreateUser:false }   // solo gli account già autorizzati ricevono il codice
+  });
+  btn.disabled=false; btn.textContent="Invia codice di accesso";
+  if(error){
+    err.textContent="Email non autorizzata o errore di invio. Controlla l'indirizzo.";
+    return;
+  }
+  pendingUser={ email };
+  document.getElementById('loginStep1').classList.add('hidden');
+  document.getElementById('loginStep2').classList.remove('hidden');
+  setTimeout(()=>document.querySelector('#codeBox input').focus(),50);
+}
+
+async function doVerify(){
+  const inputs=[...document.querySelectorAll('#codeBox input')];
+  const code=inputs.map(i=>i.value).join("");
+  const err=document.getElementById('codeErr');
+  err.textContent="";
+  if(!/^\d{6}$/.test(code)){
+    err.textContent="Inserisci tutte e 6 le cifre.";
+    return;
+  }
+  const { data, error } = await sb.auth.verifyOtp({
+    email: pendingUser.email,
+    token: code,
+    type: 'email'
+  });
+  if(error){
+    err.textContent="Codice errato o scaduto. Riprova.";
+    inputs.forEach(i=>i.value=""); inputs[0].focus();
+    return;
+  }
+  enterApp({ email: data.user.email });
+}
+
+function backToStep1(){
+  document.getElementById('loginStep2').classList.add('hidden');
+  document.getElementById('loginStep1').classList.remove('hidden');
+  document.querySelectorAll('#codeBox input').forEach(i=>i.value="");
+  document.getElementById('codeErr').textContent="";
+}
+
+async function enterApp(user){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  const base=(user.email||"S").split("@")[0].replace(/[._-]+/g," ").trim();
+  const nome=base.split(" ").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+  const ini=nome.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+  document.getElementById('userAv').textContent=ini || "S";
+  switchView('archivio');
+  render();                 // mostra subito l'interfaccia
+  await Promise.all([loadDipendenti(), loadMezzi()]);   // carica dati reali dal database
+  await Promise.all([loadNotifiche(), loadPresenze(), loadUscite()]); // campanella + presenze + uscite
+  render();                 // ridisegna con i dati reali (e accende il pallino)
+}
+
+async function logout(){
+  closeDetail();
+  closeNotif();
+  await sb.auth.signOut();
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  backToStep1();
+  document.getElementById('email').value="";
+  document.getElementById('loginErr').textContent="";
+  pendingUser=null;
+}
+
+/* all'avvio: se c'è già una sessione valida, entra diretto (dispositivo ricordato) */
+async function initAuth(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session && session.user){
+    enterApp({ email: session.user.email });
+  }
+}
+
+// auto-avanzamento tra le caselle del codice
+function setupCodeBox(){
+  const inputs=[...document.querySelectorAll('#codeBox input')];
+  inputs.forEach((inp,idx)=>{
+    inp.addEventListener('input',()=>{
+      inp.value=inp.value.replace(/\D/g,'');
+      if(inp.value && idx<inputs.length-1) inputs[idx+1].focus();
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace' && !inp.value && idx>0) inputs[idx-1].focus();
+      if(e.key==='Enter') doVerify();
+    });
+  });
+  document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+}
+
+/* ===================== HELPERS ===================== */
+function fmtDate(iso){
+  if(!iso) return "—";
+  const [y,m,d]=iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+function scadStatus(iso){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dt=new Date(iso);
+  const days=Math.round((dt-today)/86400000);
+  if(days<0) return {cls:"late", label:"Scaduta", dot:"late"};
+  if(days<=45) return {cls:"soon", label:`Tra ${days} gg`, dot:"soon"};
+  return {cls:"ok", label:"In regola", dot:"ok"};
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function getDip(id){return dipendenti.find(d=>d.id===id)}
+function getMez(id){return mezzi.find(m=>m.id===id)}
+
+/* ===================== NOTIFICHE SCADENZE ===================== */
+// Aggiunge mesi a una data ISO e ritorna ISO
+function addMonths(iso,months){
+  const d=new Date(iso); d.setMonth(d.getMonth()+months);
+  return d.toISOString().slice(0,10);
+}
+function addYears(iso,years){
+  const d=new Date(iso); d.setFullYear(d.getFullYear()+years);
+  return d.toISOString().slice(0,10);
+}
+// Raccoglie tutte le scadenze entro 60 giorni o già scadute
+/* dati pre-caricati per le notifiche (così il pallino appare senza aprire le schede) */
+let notifScadenze=[], notifVisite=[], notifCorsi=[];
+async function loadNotifiche(){
+  const [sc, vi, co] = await Promise.all([
+    sb.from('scadenze').select('tipo,data,mezzo_id'),
+    sb.from('visite').select('tipo,data,dipendente_id'),
+    sb.from('corsi').select('nome,data,validita_anni,dipendente_id')
+  ]);
+  const mezById = Object.fromEntries(mezzi.map(m=>[m.id,m]));
+  const dipById = Object.fromEntries(dipendenti.map(d=>[d.id,d]));
+  notifScadenze=(sc.data||[]).map(r=>{const m=mezById[r.mezzo_id]||{};return {tipo:r.tipo,data:r.data,targa:m.targa||'',marca:m.marca||'',modello:m.modello||''};});
+  notifVisite=(vi.data||[]).map(r=>{const d=dipById[r.dipendente_id]||{};return {tipo:r.tipo,data:r.data,nome:d.nome||'',cognome:d.cognome||''};});
+  notifCorsi=(co.data||[]).map(r=>{const d=dipById[r.dipendente_id]||{};return {nome:r.nome,data:r.data,validita:(r.validita_anni===null?1:r.validita_anni),nomeDip:d.nome||'',cognome:d.cognome||''};});
+}
+function getNotifications(){
+  const list=[];
+  notifScadenze.forEach(s=>{
+    if(!s.data) return;
+    const st=scadStatus(s.data);
+    if(st.cls==='late'||st.cls==='soon'){
+      list.push({titolo:`${s.tipo} — ${s.targa}`, sub:`${s.marca} ${s.modello}`.trim(), data:s.data, st});
+    }
+  });
+  // certificati medici: validità 1 anno dalla data della visita
+  notifVisite.forEach(v=>{
+    if(!v.data) return;
+    const scad=addMonths(v.data,12);
+    const st=scadStatus(scad);
+    if(st.cls==='late'||st.cls==='soon'){
+      list.push({titolo:`Certificato medico — ${v.nome} ${v.cognome}`, sub:v.tipo, data:scad, st});
+    }
+  });
+  // corsi di formazione: scadenza personalizzata (validità in anni; 0 = non scade)
+  notifCorsi.forEach(c=>{
+    if(!c.data || !c.validita) return;
+    const scad=addYears(c.data,c.validita);
+    const st=scadStatus(scad);
+    if(st.cls==='late'||st.cls==='soon'){
+      list.push({titolo:`Corso — ${c.nomeDip} ${c.cognome}`, sub:c.nome, data:scad, st});
+    }
+  });
+  // ordina: prima le scadute, poi le più imminenti
+  list.sort((a,b)=>new Date(a.data)-new Date(b.data));
+  return list;
+}
+function refreshBell(){
+  const n=getNotifications().length;
+  const badge=document.getElementById('bellBadge');
+  badge.textContent=n;
+  badge.classList.toggle('hidden',n===0);
+}
+function toggleNotif(e){
+  if(e) e.stopPropagation();
+  const p=document.getElementById('notifPanel');
+  if(p.classList.contains('hidden')) openNotif(); else closeNotif();
+}
+function openNotif(){
+  const notifs=getNotifications();
+  document.getElementById('notifCnt').textContent=notifs.length;
+  const list=document.getElementById('notifList');
+  if(notifs.length===0){
+    list.innerHTML=`<div class="notif-empty">Nessuna scadenza imminente 🎉</div>`;
+  }else{
+    list.innerHTML=notifs.map(n=>`
+      <div class="notif-item">
+        <span class="dot ${n.st.dot}"></span>
+        <span class="nt"><b>${n.titolo}</b><span>${n.sub} · scade il ${fmtDate(n.data)}</span></span>
+        <span class="when scad-status ${n.st.cls}">${n.st.label}</span>
+      </div>`).join("");
+  }
+  document.getElementById('notifPanel').classList.remove('hidden');
+  document.getElementById('notifOverlay').classList.remove('hidden');
+}
+function closeNotif(){
+  document.getElementById('notifPanel').classList.add('hidden');
+  document.getElementById('notifOverlay').classList.add('hidden');
+}
+
+/* ===================== SCARICA SCHEDA (ZIP reale) ===================== */
+async function scaricaScheda(id){
+  const d=getDip(id);
+  if(!d._loaded){ await caricaDettaglioDip(id); }   // assicura i dati aggiornati
+  const nomeFile=`${d.nome}_${d.cognome}`.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  toast("Preparazione scheda…");
+
+  const zip=new JSZip();
+
+  // 1) riepilogo testuale della scheda
+  let txt=`SCHEDA DIPENDENTE\n=================\n\n`;
+  txt+=`Nome: ${d.nome} ${d.cognome}\nEmail: ${d.email||'—'}\n\n`;
+  txt+=`DOTAZIONI\n---------\n`;
+  if(d.dotazioni.length) d.dotazioni.forEach(x=>{txt+=`- ${x.tipo} taglia ${x.taglia} x${x.qta}  (consegna: ${fmtDate(x.data)})\n`;});
+  else txt+=`(nessuna)\n`;
+  txt+=`\nCORSI DI FORMAZIONE\n-------------------\n`;
+  if(d.corsi.length) d.corsi.forEach(x=>{const val=x.validita?`validità ${x.validita} anni`:'non scade';txt+=`- ${x.nome}  (svolto: ${fmtDate(x.data)}, ${val})\n`;});
+  else txt+=`(nessuno)\n`;
+  txt+=`\nVISITE MEDICHE\n--------------\n`;
+  if(d.visite.length) d.visite.forEach(x=>{txt+=`- ${x.tipo}  (data: ${fmtDate(x.data)})\n`;});
+  else txt+=`(nessuna)\n`;
+  txt+=`\nBUSTE PAGA\n----------\n`;
+  if(d.buste.length) d.buste.forEach(x=>{txt+=`- ${x.mese}  ${x.busta_path?'[busta PDF]':''} ${x.bonifico_path?'[bonifico]':''}\n`;});
+  else txt+=`(nessuna)\n`;
+  txt+=`\nGenerato il ${fmtDate(new Date().toISOString().slice(0,10))}\n`;
+  zip.file(`${nomeFile}_riepilogo.txt`, txt);
+
+  // 2) scarica i file da Storage e mettili nelle cartelle
+  try{
+    const buste=zip.folder("Buste_paga");
+    for(const x of d.buste){
+      if(x.busta_path){ const f=await scaricaDaStorage('buste-paga',x.busta_path); if(f) buste.file(`${x.mese.replace(/\s+/g,'_')}_busta_${baseName(x.busta_path)}`, f); }
+      if(x.bonifico_path){ const f=await scaricaDaStorage('buste-paga',x.bonifico_path); if(f) buste.file(`${x.mese.replace(/\s+/g,'_')}_bonifico_${baseName(x.bonifico_path)}`, f); }
+    }
+    const cert=zip.folder("Certificati_corsi");
+    for(const x of d.corsi){
+      if(x.pdf_path){ const f=await scaricaDaStorage('certificati',x.pdf_path); if(f) cert.file(`${(x.nome||'corso').replace(/\s+/g,'_')}_${baseName(x.pdf_path)}`, f); }
+    }
+  }catch(e){ console.error(e); }
+
+  // 3) genera lo ZIP e avvia il download
+  const blob=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`${nomeFile}.zip`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast(`⬇ Scaricato: ${nomeFile}.zip`);
+}
+// scarica un file dallo Storage come blob
+async function scaricaDaStorage(bucket, path){
+  const { data, error } = await sb.storage.from(bucket).download(path);
+  if(error){ console.error('download', path, error); return null; }
+  return data;
+}
+function baseName(path){ return path.split('/').pop().split('_').slice(1).join('_') || path; }
+
+
+/* ===================== INVIA BUSTA PAGA (demo) ===================== */
+async function inviaBusta(id,i){
+  const d=getDip(id);
+  const it=d.buste[i];
+  if(!d.email || !d.email.trim()){
+    toast("⚠ Aggiungi prima l'email del dipendente");
+    return;
+  }
+  if(!it.busta_path && !it.bonifico_path){
+    toast("⚠ Carica prima i file e salva la scheda");
+    return;
+  }
+  if(!confirm(`Inviare busta paga e bonifico a:\n${d.nome} ${d.cognome}\n${d.email}\n(${it.mese})?`)) return;
+  toast("Invio in corso…");
+  try{
+    const { data, error } = await sb.functions.invoke('invia-busta', {
+      body: {
+        email: d.email,
+        nome: `${d.nome} ${d.cognome}`,
+        mese: it.mese,
+        busta_path: it.busta_path || null,
+        bonifico_path: it.bonifico_path || null
+      }
+    });
+    if(error || (data && data.error)){
+      console.error(error || data.error);
+      toast("Errore nell'invio della mail");
+      return;
+    }
+    toast(`✉ Inviata a ${d.email} — ${it.mese}`);
+  }catch(e){
+    console.error(e);
+    toast("Errore nell'invio della mail");
+  }
+}
+
+/* ===================== NAVIGAZIONE VISTE ===================== */
+let prodTab="oggi";
+function oggiLabel(){
+  const g=["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  const m=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  const d=new Date();
+  return `${g[d.getDay()]} ${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
+}
+function switchView(v){
+  closeNotif();
+  ['archivio','presenze','produzione'].forEach(name=>{
+    document.getElementById('view'+name.charAt(0).toUpperCase()+name.slice(1)).classList.toggle('hidden',name!==v);
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.v===v));
+  if(v==='presenze'){ presTab='oggi'; setPresTab('oggi'); }
+  if(v==='produzione'){ renderProduzione(); renderStorico(); }
+  window.scrollTo(0,0);
+}
+
+/* ===================== PRESENZE ===================== */
+let presTab="oggi";
+function setPresTab(t){
+  presTab=t;
+  document.querySelectorAll('[data-pt]').forEach(s=>s.classList.toggle('active',s.dataset.pt===t));
+  document.getElementById('presOggi').classList.toggle('hidden',t!=='oggi');
+  document.getElementById('presStorico').classList.toggle('hidden',t!=='storico');
+  if(t==='oggi') renderPresenze();
+  if(t==='storico'){ buildPresFilter(); renderStoricoPresenze(); }
+}
+function renderPresenze(){
+  document.getElementById('presDate').textContent=oggiLabel();
+  const presenti=dipendenti.filter(d=>d.presenza==='Presente').length;
+  const fuori=dipendenti.length-presenti;
+  document.getElementById('presSummary').innerHTML=
+    `<span class="pres-pill p-pres">${presenti} presenti</span>`+
+    (fuori>0?`<span class="pres-pill p-ass">${fuori} assenti</span>`:'');
+  const list=document.getElementById('presList');
+  list.innerHTML=dipendenti.map(d=>`
+    <div class="pres-row">
+      <span class="pr-name">${d.nome} ${d.cognome}</span>
+      <span class="pres-opts">
+        ${STATI_PRESENZA.map(s=>`<button class="pres-opt ${d.presenza===s?'on':''}" data-s="${s}" onclick="setPresenza(${d.id},'${s}')">${s}</button>`).join("")}
+      </span>
+    </div>`).join("");
+}
+function setPresenza(id,stato){
+  getDip(id).presenza=stato;
+  renderPresenze();
+}
+async function registraPresenze(){
+  const oggi=new Date().toISOString().slice(0,10);
+  if(!confirm("Registrare le presenze di oggi nello storico?")) return;
+  // riscrive le presenze di oggi: cancella quelle odierne e reinserisce
+  await sb.from('presenze').delete().eq('data', oggi);
+  const rows = dipendenti.map(d=>({ dipendente_id:d.id, data:oggi, stato:d.presenza||'Presente' }));
+  if(rows.length){
+    const { error } = await sb.from('presenze').insert(rows);
+    if(error){ toast("Errore nel salvataggio"); return; }
+  }
+  await loadPresenze();
+  toast("✓ Presenze di oggi registrate");
+  if(presTab==='storico') renderStoricoPresenze();
+}
+
+/* carica tutto il registro presenze da Supabase */
+async function loadPresenze(){
+  const { data, error } = await sb.from('presenze')
+    .select('dipendente_id,data,stato').order('data',{ascending:false});
+  if(error){ console.error(error); return; }
+  const dipById = Object.fromEntries(dipendenti.map(d=>[d.id,d]));
+  registroPresenze = (data||[]).map(r=>{
+    const d=dipById[r.dipendente_id]||{};
+    return { data:r.data, dipId:r.dipendente_id, nome:`${d.nome||''} ${d.cognome||''}`.trim(), stato:r.stato };
+  });
+  // applica lo stato di OGGI ai dipendenti (per la vista "Presenze di oggi")
+  const oggi=new Date().toISOString().slice(0,10);
+  registroPresenze.filter(r=>r.data===oggi).forEach(r=>{
+    const d=dipById[r.dipId]; if(d) d.presenza=r.stato;
+  });
+}
+
+function buildPresFilter(){
+  const sel=document.getElementById('presFilter');
+  const cur=sel.value;
+  sel.innerHTML=`<option value="all">Tutti i dipendenti — per giorno</option>`+
+    dipendenti.map(d=>`<option value="${d.id}">${d.nome} ${d.cognome}</option>`).join("");
+  if(cur) sel.value=cur;
+}
+function fmtDayLabel(iso){
+  const g=["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  const d=new Date(iso);
+  return `${g[d.getDay()]} ${fmtDate(iso)}`;
+}
+function renderStoricoPresenze(){
+  const sel=document.getElementById('presFilter').value;
+  const counts=document.getElementById('presCounts');
+  const hist=document.getElementById('presHistory');
+  // date uniche ordinate dal più recente
+  const date=[...new Set(registroPresenze.map(r=>r.data))].sort().reverse();
+
+  if(date.length===0){
+    counts.innerHTML="";
+    hist.innerHTML=`<div class="empty">Nessuna presenza registrata. Vai su “Presenze di oggi” e premi “Registra”.</div>`;
+    return;
+  }
+
+  if(sel==="all"){
+    // vista per giorno
+    counts.innerHTML="";
+    hist.innerHTML=date.map(data=>{
+      const recs=registroPresenze.filter(r=>r.data===data);
+      const pres=recs.filter(r=>r.stato==='Presente').length;
+      return `<div class="pres-day">
+        <div class="pres-day-head">${fmtDayLabel(data)}<span class="pd-cnt">${pres}/${recs.length} presenti</span></div>
+        <div class="pres-day-body">
+          ${recs.map(r=>`<div class="pd-row"><span class="pd-name">${r.nome}</span><span class="st-badge" data-s="${r.stato}">${r.stato}</span></div>`).join("")}
+        </div>
+      </div>`;
+    }).join("");
+  }else{
+    // vista per singolo dipendente
+    const id=parseInt(sel);
+    const recs=registroPresenze.filter(r=>r.dipId===id).sort((a,b)=>b.data.localeCompare(a.data));
+    const cnt={Presente:0,Ferie:0,Malattia:0,Permesso:0,Assente:0};
+    recs.forEach(r=>{if(cnt[r.stato]!==undefined)cnt[r.stato]++});
+    counts.innerHTML=`<div class="count-grid">
+      <div class="count-box c-pres"><div class="cn">${cnt.Presente}</div><div class="cl">Presenze</div></div>
+      <div class="count-box c-fer"><div class="cn">${cnt.Ferie}</div><div class="cl">Ferie</div></div>
+      <div class="count-box c-mal"><div class="cn">${cnt.Malattia}</div><div class="cl">Malattia</div></div>
+      <div class="count-box c-perm"><div class="cn">${cnt.Permesso}</div><div class="cl">Permesso</div></div>
+      <div class="count-box c-ass"><div class="cn">${cnt.Assente}</div><div class="cl">Assente</div></div>
+    </div>`;
+    if(recs.length===0){
+      hist.innerHTML=`<div class="empty">Nessuna presenza registrata per questo dipendente</div>`;
+      return;
+    }
+    hist.innerHTML=`<div class="pres-day"><div class="pres-day-body">${
+      recs.map(r=>`<div class="pd-row"><span class="pd-name">${fmtDayLabel(r.data)}</span><span class="st-badge" data-s="${r.stato}">${r.stato}</span></div>`).join("")
+    }</div></div>`;
+  }
+}
+
+/* ===================== PRODUZIONE — squadre di oggi ===================== */
+function setProdTab(t){
+  prodTab=t;
+  document.querySelectorAll('.subtab').forEach(s=>s.classList.toggle('active',s.dataset.t===t));
+  document.getElementById('prodOggi').classList.toggle('hidden',t!=='oggi');
+  document.getElementById('prodStorico').classList.toggle('hidden',t!=='storico');
+}
+function targheOptions(sel){
+  return `<option value="">— scegli mezzo —</option>`+
+    mezzi.map(m=>`<option value="${m.targa}" ${m.targa===sel?'selected':''}>${m.targa} · ${m.marca} ${m.modello}</option>`).join("");
+}
+function renderProduzione(){
+  document.getElementById('prodDate').textContent=oggiLabel();
+  document.getElementById('squadCount').textContent=squadreOggi.length;
+  const list=document.getElementById('squadList');
+  if(squadreOggi.length===0){
+    list.innerHTML=`<div class="empty">Nessuna squadra. Premi “＋ Squadra” per aggiungerne una.</div>`;
+    return;
+  }
+  list.innerHTML=squadreOggi.map((s,i)=>`
+    <div class="squad">
+      <div class="squad-head">
+        <span class="sq-title"><span class="sq-num">${i+1}</span> Squadra ${i+1}</span>
+        <button class="rm" onclick="removeSquadra(${i})">−</button>
+      </div>
+      <div class="squad-body">
+        <div class="field">
+          <label>Assistente</label>
+          <input value="${esc(s.assistente)}" oninput="squadField(${i},'assistente',this.value)" placeholder="Nome dell'assistente">
+        </div>
+        <div class="field">
+          <label>Mezzo utilizzato</label>
+          <select onchange="squadField(${i},'mezzo',this.value)">${targheOptions(s.mezzo)}</select>
+        </div>
+        <div class="field">
+          <label>Componenti della squadra</label>
+          <input value="${esc(s.componenti)}" oninput="squadField(${i},'componenti',this.value)" placeholder="Es. Esposito, Russo">
+        </div>
+        <div class="field">
+          <label>Lavoro svolto durante la giornata</label>
+          <textarea oninput="squadField(${i},'lavoro',this.value)" placeholder="Cosa ha fatto la squadra…">${esc(s.lavoro)}</textarea>
+        </div>
+      </div>
+    </div>`).join("");
+}
+function squadField(i,f,v){squadreOggi[i][f]=v}
+function addSquadra(){
+  if(squadreOggi.length>=10){toast("Massimo 10 squadre al giorno");return;}
+  squadreOggi.push({assistente:"",mezzo:"",componenti:"",lavoro:""});
+  renderProduzione();
+}
+function removeSquadra(i){squadreOggi.splice(i,1);renderProduzione();}
+async function registraGiornata(){
+  const valide=squadreOggi.filter(s=>s.assistente.trim() || s.componenti.trim() || s.lavoro.trim());
+  if(valide.length===0){toast("Compila almeno una squadra");return;}
+  if(!confirm(`Registrare ${valide.length} uscit${valide.length>1?'e':'a'} di oggi nell'archivio?`)) return;
+  const oggi=new Date().toISOString().slice(0,10);
+  const rows=valide.map((s,idx)=>({
+    data:oggi, squadra:idx+1, assistente:s.assistente, mezzo:s.mezzo, componenti:s.componenti, lavoro:s.lavoro
+  }));
+  const { error } = await sb.from('uscite').insert(rows);
+  if(error){ toast("Errore nel salvataggio"); return; }
+  await loadUscite();
+  squadreOggi=[];                 // svuota le squadre di oggi dopo la registrazione
+  renderProduzione();
+  toast(`✓ Registrate ${valide.length} uscite di oggi`);
+  renderStorico();
+}
+
+/* carica l'archivio uscite da Supabase */
+async function loadUscite(){
+  const { data, error } = await sb.from('uscite')
+    .select('*').order('data',{ascending:false}).order('squadra');
+  if(error){ console.error(error); return; }
+  uscite = (data||[]).map(r=>({
+    data:r.data, squadra:r.squadra, assistente:r.assistente||'',
+    mezzo:r.mezzo||'', componenti:r.componenti||'', lavoro:r.lavoro||''
+  }));
+}
+
+/* ===================== PRODUZIONE — archivio uscite ===================== */
+function renderStorico(){
+  const q=(document.getElementById('usciteSearch').value||"").trim().toLowerCase();
+  const list=document.getElementById('usciteList');
+  const filt=uscite.filter(u=>u.assistente.toLowerCase().includes(q));
+  if(filt.length===0){
+    list.innerHTML=`<div class="empty">${q?'Nessuna uscita per questo assistente':'Nessuna uscita registrata'}</div>`;
+    return;
+  }
+  list.innerHTML=filt.map(u=>{
+    const mez=mezzi.find(m=>m.targa===u.mezzo);
+    const mezTxt=u.mezzo?`<span class="plate">${u.mezzo}</span>${mez?' '+mez.marca+' '+mez.modello:''}`:'—';
+    return `<div class="uscita-card">
+      <div class="uc-top">
+        <span class="uc-date">${fmtDate(u.data)}</span>
+        <span class="uc-sq">Squadra ${u.squadra}</span>
+      </div>
+      <div class="uc-line"><span class="uc-lbl">Assistente</span><span class="uc-val">${esc(u.assistente)||'—'}</span></div>
+      <div class="uc-line"><span class="uc-lbl">Componenti</span><span class="uc-val">${esc(u.componenti)||'—'}</span></div>
+      <div class="uc-line"><span class="uc-lbl">Mezzo</span><span class="uc-val">${mezTxt}</span></div>
+      <div class="uc-line"><span class="uc-lbl">Lavoro</span><span class="uc-val">${esc(u.lavoro)||'—'}</span></div>
+    </div>`;
+  }).join("");
+}
+
+/* ===================== FILTRI / RENDER LISTA ===================== */
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.f===f));
+  render();
+}
+function render(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const dipSec=document.getElementById('dipSection');
+  const mezSec=document.getElementById('mezSection');
+  dipSec.style.display=(filter==='mez')?'none':'';
+  mezSec.style.display=(filter==='dip')?'none':'';
+
+  // dipendenti
+  const dc=document.getElementById('dipCards'); dc.innerHTML="";
+  const fd=dipendenti.filter(d=>(`${d.nome} ${d.cognome}`).toLowerCase().includes(q));
+  if(fd.length===0){dc.innerHTML='<div class="empty">Nessun dipendente trovato</div>';}
+  fd.forEach(d=>{
+    const ini=(d.nome[0]||"")+(d.cognome[0]||"");
+    const card=document.createElement('div');
+    card.className="card dip"; card.onclick=()=>openDip(d.id);
+    card.innerHTML=`<span class="ic">${ini.toUpperCase()}</span>
+      <span class="main"><span class="ttl">${d.nome} ${d.cognome}</span>
+      <span class="meta">${d.email ? esc(d.email) : 'Nessuna email'}</span></span>
+      <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>`;
+    dc.appendChild(card);
+  });
+
+  // mezzi
+  const mc=document.getElementById('mezCards'); mc.innerHTML="";
+  const fm=mezzi.filter(m=>m.targa.toLowerCase().includes(q.replace(/\s/g,'')) ||
+    (`${m.marca} ${m.modello}`).toLowerCase().includes(q));
+  if(fm.length===0){mc.innerHTML='<div class="empty">Nessun mezzo trovato</div>';}
+  fm.forEach(m=>{
+    const late=m.scadenze.filter(s=>scadStatus(s.data).cls==='late').length;
+    const soon=m.scadenze.filter(s=>scadStatus(s.data).cls==='soon').length;
+    let warn="";
+    if(late) warn=`<span class="badge-warn">${late} scaduta${late>1?'e':''}</span>`;
+    else if(soon) warn=`<span class="badge-warn" style="color:#9a5a13;background:var(--amber-tint)">${soon} in scadenza</span>`;
+    const card=document.createElement('div');
+    card.className="card mez"; card.onclick=()=>openMez(m.id);
+    card.innerHTML=`<span class="ic">🚐</span>
+      <span class="main"><span class="ttl"><span class="plate">${m.targa}</span>${warn}</span>
+      <span class="meta">${m.marca} ${m.modello} · ${m.anno}</span></span>
+      <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>`;
+    mc.appendChild(card);
+  });
+  refreshBell();
+}
+
+/* ===================== AGGIUNGI / ELIMINA ===================== */
+async function addDipendente(){
+  const { data, error } = await sb.from('dipendenti')
+    .insert({ nome:'Nuovo', cognome:'Dipendente', email:'', presenza:'Presente' })
+    .select().single();
+  if(error){ toast("Errore nel salvataggio"); return; }
+  const d={ id:data.id, nome:data.nome, cognome:data.cognome, email:data.email||'',
+            presenza:data.presenza||'Presente', dotazioni:[], corsi:[], visite:[], buste:[], _loaded:true };
+  dipendenti.unshift(d); render(); openDip(d.id);
+  toast("Dipendente aggiunto");
+}
+async function addMezzo(){
+  const { data, error } = await sb.from('mezzi')
+    .insert({ targa:'XX000XX', marca:'', modello:'', anno:'' })
+    .select().single();
+  if(error){ toast("Errore nel salvataggio"); return; }
+  const m={ id:data.id, targa:data.targa, marca:data.marca||'', modello:data.modello||'',
+            anno:data.anno||'', interventi:[], scadenze:[], _loaded:true };
+  mezzi.unshift(m); render(); openMez(m.id);
+  toast("Mezzo aggiunto");
+}
+async function deleteCurrent(){
+  if(!current) return;
+  if(!confirm("Eliminare definitivamente questa scheda?")) return;
+  if(current.type==='dip'){
+    const { error } = await sb.from('dipendenti').delete().eq('id', current.id);
+    if(error){ toast("Errore eliminazione"); return; }
+    dipendenti=dipendenti.filter(d=>d.id!==current.id);
+  } else {
+    const { error } = await sb.from('mezzi').delete().eq('id', current.id);
+    if(error){ toast("Errore eliminazione"); return; }
+    mezzi=mezzi.filter(m=>m.id!==current.id);
+  }
+  closeDetail(); render(); toast("Scheda eliminata");
+}
+
+/* salva la scheda mezzo su Supabase (anagrafica + interventi + scadenze) */
+async function salvaMezzo(id){
+  const m=getMez(id);
+  const { error } = await sb.from('mezzi')
+    .update({ targa:m.targa, marca:m.marca||'', modello:m.modello||'', anno:m.anno||'' })
+    .eq('id', id);
+  if(error){ toast("Errore nel salvataggio"); return; }
+  // interventi — riscrivo l'intera lista
+  await sb.from('interventi').delete().eq('mezzo_id', id);
+  if(m.interventi.length){
+    await sb.from('interventi').insert(m.interventi.map(x=>({
+      mezzo_id:id, tipo:x.tipo, descrizione:x.desc||'', data:x.data||null
+    })));
+  }
+  // scadenze
+  await sb.from('scadenze').delete().eq('mezzo_id', id);
+  if(m.scadenze.length){
+    await sb.from('scadenze').insert(m.scadenze.map(x=>({
+      mezzo_id:id, tipo:x.tipo, data:x.data||null
+    })));
+  }
+  await loadNotifiche(); refreshBell();
+  toast("✓ Scheda salvata");
+}
+
+/* carica interventi e scadenze di un singolo mezzo */
+async function caricaDettaglioMez(id){
+  const m=getMez(id); if(!m) return;
+  const [intv,scad] = await Promise.all([
+    sb.from('interventi').select('*').eq('mezzo_id',id),
+    sb.from('scadenze').select('*').eq('mezzo_id',id)
+  ]);
+  m.interventi=(intv.data||[]).map(r=>({tipo:r.tipo||'Controllo',desc:r.descrizione||'',data:r.data||''}));
+  m.scadenze=(scad.data||[]).map(r=>({tipo:r.tipo||'Revisione',data:r.data||''}));
+  m._loaded=true;
+  if(current && current.type==='mez' && current.id===id) openMez(id);
+}
+
+/* carica tutti i mezzi da Supabase all'avvio */
+async function loadMezzi(){
+  const { data, error } = await sb.from('mezzi').select('*').order('targa');
+  if(error){ console.error(error); return; }
+  mezzi = (data||[]).map(r=>({
+    id:r.id, targa:r.targa||'', marca:r.marca||'', modello:r.modello||'', anno:r.anno||'',
+    interventi:[], scadenze:[], _loaded:false
+  }));
+}
+
+/* salva l'anagrafica del dipendente su Supabase (pulsante "Salva scheda") */
+async function salvaDipendente(id){
+  const d=getDip(id);
+  // 1) anagrafica
+  const { error } = await sb.from('dipendenti')
+    .update({ nome:d.nome, cognome:d.cognome, email:d.email||'' })
+    .eq('id', id);
+  if(error){ toast("Errore nel salvataggio"); return; }
+
+  // 2) dotazioni — riscrivo l'intera lista
+  await sb.from('dotazioni').delete().eq('dipendente_id', id);
+  if(d.dotazioni.length){
+    await sb.from('dotazioni').insert(d.dotazioni.map(x=>({
+      dipendente_id:id, tipo:x.tipo, taglia:x.taglia, qta:x.qta, data_consegna:x.data||null
+    })));
+  }
+  // 3) corsi
+  await sb.from('corsi').delete().eq('dipendente_id', id);
+  if(d.corsi.length){
+    await sb.from('corsi').insert(d.corsi.map(x=>({
+      dipendente_id:id, nome:x.nome, data:x.data||null,
+      validita_anni:(x.validita===undefined||x.validita===null)?1:x.validita,
+      pdf_path:x.pdf_path||null
+    })));
+  }
+  // 4) visite
+  await sb.from('visite').delete().eq('dipendente_id', id);
+  if(d.visite.length){
+    await sb.from('visite').insert(d.visite.map(x=>({
+      dipendente_id:id, tipo:x.tipo, data:x.data||null
+    })));
+  }
+  // 5) buste paga (dati + percorsi file)
+  await sb.from('buste_paga').delete().eq('dipendente_id', id);
+  if(d.buste.length){
+    await sb.from('buste_paga').insert(d.buste.map(x=>({
+      dipendente_id:id, mese:x.mese, busta_path:x.busta_path||null, bonifico_path:x.bonifico_path||null
+    })));
+  }
+  await loadNotifiche(); refreshBell();
+  toast("✓ Scheda salvata");
+}
+
+/* carica dotazioni/corsi/visite/buste di un singolo dipendente dal database */
+async function caricaDettaglioDip(id){
+  const d=getDip(id); if(!d) return;
+  const [dot,cor,vis,bus] = await Promise.all([
+    sb.from('dotazioni').select('*').eq('dipendente_id',id),
+    sb.from('corsi').select('*').eq('dipendente_id',id),
+    sb.from('visite').select('*').eq('dipendente_id',id),
+    sb.from('buste_paga').select('*').eq('dipendente_id',id)
+  ]);
+  d.dotazioni=(dot.data||[]).map(r=>({tipo:r.tipo||'Maglia',taglia:r.taglia||'',qta:r.qta||1,data:r.data_consegna||''}));
+  d.corsi=(cor.data||[]).map(r=>({nome:r.nome||'',data:r.data||'',validita:(r.validita_anni===null||r.validita_anni===undefined)?1:r.validita_anni,pdf:!!r.pdf_path,pdf_path:r.pdf_path||null}));
+  d.visite=(vis.data||[]).map(r=>({tipo:r.tipo||'',data:r.data||''}));
+  d.buste=(bus.data||[]).map(r=>({mese:r.mese||'',busta:!!r.busta_path,bonifico:!!r.bonifico_path,busta_path:r.busta_path||null,bonifico_path:r.bonifico_path||null}));
+  d._loaded=true;
+  if(current && current.type==='dip' && current.id===id) openDip(id);
+}
+
+/* carica tutti i dipendenti da Supabase all'avvio */
+async function loadDipendenti(){
+  const { data, error } = await sb.from('dipendenti').select('*').order('cognome');
+  if(error){ console.error(error); return; }
+  dipendenti = (data||[]).map(r=>({
+    id:r.id, nome:r.nome||'', cognome:r.cognome||'', email:r.email||'',
+    presenza:r.presenza||'Presente',
+    dotazioni:[], corsi:[], visite:[], buste:[], _loaded:false
+  }));
+}
+
+/* ===================== DETTAGLIO DIPENDENTE ===================== */
+function openDip(id){
+  current={type:'dip',id};
+  const d=getDip(id);
+  document.getElementById('dtName').textContent=`${d.nome} ${d.cognome}`;
+  const b=document.getElementById('detailBody');
+  b.innerHTML="";
+
+  // pulsante scarica scheda completa
+  const dl=document.createElement('div');
+  dl.className="download-bar";
+  dl.innerHTML=`<button class="download-btn" onclick="scaricaScheda(${id})">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+    Scarica scheda completa <small>(.zip)</small>
+  </button>`;
+  b.appendChild(dl);
+
+  // anagrafica
+  b.appendChild(panel("👤","Anagrafica",`
+    <div class="field-row">
+      <div class="field"><label>Nome</label><input value="${esc(d.nome)}" oninput="updDip(${id},'nome',this.value)"></div>
+      <div class="field"><label>Cognome</label><input value="${esc(d.cognome)}" oninput="updDip(${id},'cognome',this.value)"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Email (per invio busta paga)</label><input type="email" value="${esc(d.email||'')}" oninput="updDip(${id},'email',this.value)" placeholder="indirizzo@email.it"></div>
+    </div>
+    <button class="register-btn" style="margin-top:14px" onclick="salvaDipendente(${id})">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      Salva scheda
+    </button>`));
+
+  // dotazioni
+  let dot="";
+  d.dotazioni.forEach((it,i)=>{
+    dot+=`<div class="item">
+      <div class="grow">
+        <span class="inline-lbl">Capo</span>
+        <select onchange="dotField(${id},${i},'tipo',this.value)">
+          ${TIPI_DOT.map(t=>`<option ${t===it.tipo?'selected':''}>${t}</option>`).join("")}
+        </select>
+      </div>
+      <div class="grow" style="max-width:90px">
+        <span class="inline-lbl">Taglia</span>
+        <select onchange="dotField(${id},${i},'taglia',this.value)">
+          ${(TAGLIE[it.tipo]||["—"]).map(t=>`<option ${t===it.taglia?'selected':''}>${t}</option>`).join("")}
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="inline-lbl">Quantità</span>
+        <div class="stepper">
+          <button onclick="dotQty(${id},${i},-1)">−</button>
+          <span class="qval">${it.qta}</span>
+          <button onclick="dotQty(${id},${i},1)">＋</button>
+        </div>
+      </div>
+      <div class="grow" style="max-width:150px">
+        <span class="inline-lbl">Data consegna</span>
+        <input type="date" value="${it.data}" onchange="dotField(${id},${i},'data',this.value)">
+      </div>
+      <button class="rm" onclick="dotDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(d.dotazioni.length===0) dot=`<div class="empty">Nessuna dotazione registrata</div>`;
+  dot+=`<button class="add-line" onclick="dotAdd(${id})">＋ Aggiungi capo</button>`;
+  b.appendChild(panel("👕","Dotazioni (vestiario)",dot));
+
+  // corsi
+  let cor="";
+  d.corsi.forEach((it,i)=>{
+    const validita = (it.validita===undefined||it.validita===null) ? 1 : it.validita;
+    cor+=`<div class="item">
+      <div class="grow"><span class="inline-lbl">Corso</span>
+        <input value="${esc(it.nome)}" oninput="corField(${id},${i},'nome',this.value)" placeholder="Nome del corso"></div>
+      <div class="grow" style="max-width:150px"><span class="inline-lbl">Data svolgimento</span>
+        <input type="date" value="${it.data}" onchange="corField(${id},${i},'data',this.value)"></div>
+      <div class="grow" style="max-width:120px"><span class="inline-lbl">Validità</span>
+        <select onchange="corValidita(${id},${i},this.value)">
+          ${VALIDITA_CORSO.map(o=>`<option value="${o.v}" ${o.v===validita?'selected':''}>${o.l}</option>`).join("")}
+        </select></div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="inline-lbl">Certificato</span>
+        <button class="file-pill ${it.pdf?'has':''}" onclick="corsoFile(${id},${i})">
+          ${it.pdf?'✓ Certificato PDF':'＋ Carica PDF'}
+        </button>
+      </div>
+      <button class="rm" onclick="corDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(d.corsi.length===0) cor=`<div class="empty">Nessun corso registrato</div>`;
+  cor+=`<button class="add-line" onclick="corAdd(${id})">＋ Aggiungi corso</button>`;
+  b.appendChild(panel("🎓","Corsi di formazione",cor));
+
+  // visite
+  let vis="";
+  d.visite.forEach((it,i)=>{
+    vis+=`<div class="item">
+      <div class="grow"><span class="inline-lbl">Tipo di visita</span>
+        <input value="${esc(it.tipo)}" oninput="visField(${id},${i},'tipo',this.value)" placeholder="Es. visita periodica"></div>
+      <div class="grow" style="max-width:160px"><span class="inline-lbl">Data</span>
+        <input type="date" value="${it.data}" onchange="visField(${id},${i},'data',this.value)"></div>
+      <button class="rm" onclick="visDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(d.visite.length===0) vis=`<div class="empty">Nessuna visita registrata</div>`;
+  vis+=`<button class="add-line" onclick="visAdd(${id})">＋ Aggiungi visita</button>`;
+  b.appendChild(panel("🩺","Visite mediche",vis));
+
+  // buste paga
+  let bp="";
+  d.buste.forEach((it,i)=>{
+    const pronta = it.busta && it.bonifico;
+    bp+=`<div class="busta">
+      <span class="mese">${esc(it.mese)}</span>
+      <button class="file-pill ${it.busta?'has':''}" onclick="bustaFile(${id},${i},'busta')">
+        ${it.busta?'✓ Busta PDF':'＋ Carica busta'}
+      </button>
+      <button class="file-pill ${it.bonifico?'has':''}" onclick="bustaFile(${id},${i},'bonifico')">
+        ${it.bonifico?'✓ Screen bonifico':'＋ Carica bonifico'}
+      </button>
+      <button class="send-btn" ${pronta?'':'disabled'} onclick="inviaBusta(${id},${i})">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Invia
+      </button>
+      <button class="rm" onclick="bustaDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(d.buste.length===0) bp=`<div class="empty">Nessuna busta paga caricata</div>`;
+  bp+=`<button class="add-line" onclick="bustaAdd(${id})">＋ Aggiungi mese</button>`;
+  b.appendChild(panel("📄","Buste paga e bonifici",bp));
+
+  openDetail();
+  if(!d._loaded) caricaDettaglioDip(id);   // carica dotazioni/corsi/visite/buste dal database
+}
+
+/* ===================== DETTAGLIO MEZZO ===================== */
+function openMez(id){
+  current={type:'mez',id};
+  const m=getMez(id);
+  document.getElementById('dtName').textContent=m.targa;
+  const b=document.getElementById('detailBody');
+  b.innerHTML="";
+
+  b.appendChild(panel("🚐","Dati del mezzo",`
+    <div class="field-row">
+      <div class="field"><label>Targa</label><input value="${esc(m.targa)}" oninput="updMez(${id},'targa',this.value.toUpperCase())" style="text-transform:uppercase;font-weight:700"></div>
+      <div class="field"><label>Marca</label><input value="${esc(m.marca)}" oninput="updMez(${id},'marca',this.value)"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Modello</label><input value="${esc(m.modello)}" oninput="updMez(${id},'modello',this.value)"></div>
+      <div class="field"><label>Anno</label><input value="${esc(m.anno)}" oninput="updMez(${id},'anno',this.value)"></div>
+    </div>`));
+
+  // interventi
+  let inter="";
+  m.interventi.forEach((it,i)=>{
+    inter+=`<div class="item">
+      <div class="grow" style="max-width:150px"><span class="inline-lbl">Tipo</span>
+        <select onchange="intField(${id},${i},'tipo',this.value)">
+          ${TIPI_INT.map(t=>`<option ${t===it.tipo?'selected':''}>${t}</option>`).join("")}
+        </select></div>
+      <div class="grow"><span class="inline-lbl">Descrizione</span>
+        <input value="${esc(it.desc)}" oninput="intField(${id},${i},'desc',this.value)" placeholder="Cosa è stato fatto"></div>
+      <div class="grow" style="max-width:150px"><span class="inline-lbl">Data</span>
+        <input type="date" value="${it.data}" onchange="intField(${id},${i},'data',this.value)"></div>
+      <button class="rm" onclick="intDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(m.interventi.length===0) inter=`<div class="empty">Nessun intervento registrato</div>`;
+  inter+=`<button class="add-line" onclick="intAdd(${id})">＋ Aggiungi intervento</button>`;
+  b.appendChild(panel("🔧","Controlli, riparazioni e sostituzioni",inter));
+
+  // scadenze
+  let sc="";
+  m.scadenze.forEach((it,i)=>{
+    const st=scadStatus(it.data);
+    sc+=`<div class="scad">
+      <span class="dot ${st.dot}"></span>
+      <div class="grow" style="max-width:160px"><span class="inline-lbl">Tipo</span>
+        <select onchange="scadField(${id},${i},'tipo',this.value)">
+          ${TIPI_SCAD.map(t=>`<option ${t===it.tipo?'selected':''}>${t}</option>`).join("")}
+        </select></div>
+      <div class="grow" style="max-width:160px"><span class="inline-lbl">Scadenza</span>
+        <input type="date" value="${it.data}" onchange="scadField(${id},${i},'data',this.value)"></div>
+      <span class="scad-status ${st.cls}">${st.label}</span>
+      <button class="rm" onclick="scadDel(${id},${i})">−</button>
+    </div>`;
+  });
+  if(m.scadenze.length===0) sc=`<div class="empty">Nessuna scadenza registrata</div>`;
+  sc+=`<button class="add-line" onclick="scadAdd(${id})">＋ Aggiungi scadenza</button>`;
+  b.appendChild(panel("📅","Scadenze (collaudo, revisione, assicurazione…)",sc));
+
+  // pulsante salva
+  const sv=document.createElement('div');
+  sv.className="download-bar";
+  sv.innerHTML=`<button class="register-btn" onclick="salvaMezzo(${id})">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+    Salva scheda</button>`;
+  b.appendChild(sv);
+
+  openDetail();
+  if(!m._loaded) caricaDettaglioMez(id);   // carica interventi e scadenze dal database
+}
+
+/* ===================== PANNELLO helper ===================== */
+function panel(icon,title,inner){
+  const p=document.createElement('div');
+  p.className="panel";
+  p.innerHTML=`<div class="panel-head"><h3><span class="pic">${icon}</span>${title}</h3></div>
+    <div class="panel-body">${inner}</div>`;
+  return p;
+}
+function esc(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function openDetail(){closeNotif();document.getElementById('detail').classList.add('open');document.body.style.overflow='hidden'}
+function closeDetail(){document.getElementById('detail').classList.remove('open');document.body.style.overflow='';current=null}
+
+/* ===================== MUTAZIONI DIPENDENTE ===================== */
+function updDip(id,f,v){getDip(id)[f]=v; if(f==='nome'||f==='cognome'){document.getElementById('dtName').textContent=`${getDip(id).nome} ${getDip(id).cognome}`} }
+function dotField(id,i,f,v){const d=getDip(id);d.dotazioni[i][f]=v; if(f==='tipo'){d.dotazioni[i].taglia=(TAGLIE[v]||["—"])[0]} openDip(id)}
+function dotQty(id,i,n){const it=getDip(id).dotazioni[i];it.qta=Math.max(0,it.qta+n);openDip(id)}
+function dotAdd(id){getDip(id).dotazioni.push({tipo:"Maglia",taglia:"M",qta:1,data:new Date().toISOString().slice(0,10)});openDip(id);toast("Capo aggiunto")}
+function dotDel(id,i){getDip(id).dotazioni.splice(i,1);openDip(id)}
+function corField(id,i,f,v){getDip(id).corsi[i][f]=v}
+function corValidita(id,i,v){getDip(id).corsi[i].validita=parseInt(v)}
+function corAdd(id){getDip(id).corsi.push({nome:"",data:new Date().toISOString().slice(0,10),validita:1,pdf:false,pdf_path:null});openDip(id);toast("Corso aggiunto")}
+function corDel(id,i){getDip(id).corsi.splice(i,1);openDip(id)}
+function corsoFile(id,i){
+  const it=getDip(id).corsi[i];
+  if(it.pdf_path){ apriFile('certificati', it.pdf_path); return; }   // già caricato → apri
+  pickAndUpload('certificati',(path)=>{ it.pdf_path=path; it.pdf=true; openDip(id); toast("Certificato caricato"); });
+}
+function visField(id,i,f,v){getDip(id).visite[i][f]=v}
+function visAdd(id){getDip(id).visite.push({tipo:"",data:new Date().toISOString().slice(0,10)});openDip(id);toast("Visita aggiunta")}
+function visDel(id,i){getDip(id).visite.splice(i,1);openDip(id)}
+function bustaFile(id,i,which){
+  const it=getDip(id).buste[i];
+  const campo = which==='busta' ? 'busta_path' : 'bonifico_path';
+  if(it[campo]){ apriFile('buste-paga', it[campo]); return; }        // già caricato → apri
+  pickAndUpload('buste-paga',(path)=>{ it[campo]=path; it[which]=true; openDip(id); toast("File caricato"); });
+}
+function bustaAdd(id){getDip(id).buste.unshift({mese:"Nuovo mese",busta:false,bonifico:false,busta_path:null,bonifico_path:null});openDip(id);toast("Mese aggiunto")}
+function bustaDel(id,i){getDip(id).buste.splice(i,1);openDip(id)}
+
+/* ===================== FILE / STORAGE ===================== */
+// apre il selettore file, carica nel bucket, restituisce il percorso salvato
+function pickAndUpload(bucket, onDone){
+  const inp=document.createElement('input');
+  inp.type='file';
+  inp.accept='application/pdf,image/*';
+  inp.onchange=async()=>{
+    const file=inp.files[0]; if(!file) return;
+    toast("Caricamento in corso…");
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=`${Date.now()}_${safe}`;
+    const { error } = await sb.storage.from(bucket).upload(path, file, { upsert:true });
+    if(error){ toast("Errore nel caricamento file"); return; }
+    onDone(path);
+  };
+  inp.click();
+}
+// genera un link temporaneo privato e apre il file
+async function apriFile(bucket, path){
+  const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 3600);
+  if(error){ toast("Errore nell'apertura del file"); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+
+/* ===================== MUTAZIONI MEZZO ===================== */
+function updMez(id,f,v){getMez(id)[f]=v; if(f==='targa'){document.getElementById('dtName').textContent=v}}
+function intField(id,i,f,v){getMez(id).interventi[i][f]=v}
+function intAdd(id){getMez(id).interventi.push({tipo:"Controllo",desc:"",data:new Date().toISOString().slice(0,10)});openMez(id);toast("Intervento aggiunto")}
+function intDel(id,i){getMez(id).interventi.splice(i,1);openMez(id)}
+function scadField(id,i,f,v){getMez(id).scadenze[i][f]=v;openMez(id)}
+function scadAdd(id){getMez(id).scadenze.push({tipo:"Revisione",data:new Date(Date.now()+86400000*180).toISOString().slice(0,10)});openMez(id);toast("Scadenza aggiunta")}
+function scadDel(id,i){getMez(id).scadenze.splice(i,1);openMez(id)}
+
+/* ===================== AVVIO ===================== */
+setupCodeBox();
+initAuth();
+</script>
+</body>
+</html>
